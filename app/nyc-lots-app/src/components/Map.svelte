@@ -6,7 +6,7 @@
     let map;
 
     // Define a function to fly to the passed coordinates and zoom level
-    export const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14) => {
+    export const flyTo = (coordinates = [-74.0060, 40.7128], zoomLevel = 14) => {
         if (map) {
         map.flyTo({
             center: coordinates,
@@ -21,7 +21,7 @@
       map = new maplibre.Map({
         container: 'map',
         style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-        center: [-79.3832, 43.6532], // Toronto, for example
+        center: [-74.0060, 40.7128], // Toronto, for example
         zoom: 12
       });
     });
