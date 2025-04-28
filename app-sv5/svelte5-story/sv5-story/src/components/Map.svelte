@@ -17,6 +17,11 @@
   let map;
   const dispatch = createEventDispatcher();
   let mapShown = false; // flag to show map only once
+  
+  // Initialize coordinate display variables
+  let cursorLng = '-74.000';
+  let cursorLat = '40.700';
+  let cursorZoom = '9.8';
 
   // // Fly-to function remains unchanged.
   // const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14) => {
@@ -47,6 +52,18 @@
         [-74.9, 40.4],
         [-73.5, 41.0]
       ]
+    });
+
+    // Add mousemove event handler
+    map.on('mousemove', (e) => {
+      cursorLng = e.lngLat.lng.toFixed(4);
+      cursorLat = e.lngLat.lat.toFixed(4);
+      cursorZoom = map.getZoom().toFixed(2);
+    });
+
+    // Add zoom event handler
+    map.on('zoom', () => {
+      cursorZoom = map.getZoom().toFixed(2);
     });
 
     map.on('load', () => {
@@ -408,7 +425,24 @@
     width: 100%;
     display: none; /* Hide the map initially */
   }
-  /* You can keep your popup CSS commented or add your custom styles as needed */
+  
+  .coordinates-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 1000;  /* Increased z-index */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    pointer-events: none;  /* Allow clicking through the box */
+    user-select: none;  /* Prevent text selection */
+  }
 </style>
   
 <div id="map"></div>
+<div class="coordinates-box">
+  Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
+</div>

@@ -6,7 +6,8 @@
 	import Sidebar from '../components/Sidebar.svelte';
 	import Map from '../components/Map.svelte';
 	import SplashPage from '../components/Splash_.svelte';
-	import BoroChart from '../components/BoroChart.svelte';
+	// import BoroChart from '../components/BoroChart.svelte';
+	// import LotSizeChart from '../components/LotSize.svelte'
 
 	let mapRef;
 	let sidebarVisible = true;

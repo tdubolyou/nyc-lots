@@ -1,6 +1,8 @@
 <script>
   import { slide } from 'svelte/transition';
-  import boroChart from './BoroChart.svelte';
+  import BoroChart from './BoroChart.svelte';
+  import LotSizeChart from './LotSize.svelte';
+  import LotScatterChart from './LotScatter.svelte';
   
   export let flyTo; // Function passed in from the parent component to handle map flyTo
 
@@ -8,7 +10,9 @@
 
   // Map block component names to Svelte components.
   const componentMap = {
-    BoroChart: boroChart
+    BoroChart: BoroChart,
+    LotSizeChart: LotSizeChart,
+    LotScatterChart: LotScatterChart
     // Add additional chart/component mappings here if needed.
   };
 
@@ -30,7 +34,8 @@
     { 
       title: "How big are they?", 
       content: [
-        { type: "text", value: "Details about data sources." }
+        { type: "text", value: "Sint voluptate id sunt est sint. Sint elit pariatur deserunt nisi duis culpa amet tempor magna quis. In dolore laboris voluptate ad excepteur velit ex velit minim occaecat in cillum. Ut et anim nisi tempor nostrud adipisicing.  Dolor deserunt consectetur dolore eu sunt duis ex sit eiusmod commodo reprehenderit adipisicing minim. Ex proident fugiat culpa quis proident eu magna cillum aliquip deserunt amet pariatur consectetur. Do ullamco aliquip sunt occaecat velit sunt culpa velit enim eu adipisicing.  Dolore exercitation sunt sunt excepteur proident irure. Incididunt velit nostrud Lorem exercitation dolor non amet. Sit nisi tempor ea exercitation velit minim quis deserunt id velit. Incididunt enim tempor laboris mollit sunt sit nisi eu id. Duis veniam dolor nisi dolor exercitation sint cupidatat laborum et nostrud. Dolor consectetur eiusmod excepteur cillum consequat. Enim consectetur fugiat amet Lorem labore." },
+        { type: "chart", component: "LotScatterChart" }      
       ],
       coordinates: [-73.856077, 40.848447],
       zoomLevel: 16,
