@@ -103,7 +103,6 @@
   .sidebar {
     background: #ffffff;
     border-right: 1px solid #e5e5e5;
-    padding: 1rem;
     height: 100vh;
     width: 400px;
     position: absolute;
@@ -112,6 +111,14 @@
     font-family: 'Barlow', sans-serif;
     color: #333;
     z-index: 999;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-content {
+    padding: 1rem;
+    overflow-y: auto;
+    flex-grow: 1;
   }
   
   .sidebar-hidden {
@@ -206,47 +213,49 @@
   <!-- Collapse Button -->
   <button class="collapse-button" on:click={closeSidebar} aria-label="Close sidebar">×</button>
   
-  <!-- Header Section -->
-  <header>
-    <h1>How much housing could be built on the parking lots of NYC?</h1>
-    <h2>A lot, actually</h2>
-    <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
-  </header>
-  
-  <!-- Render each section -->
-  {#each sections as section, index}
-    <div class="section">
-      <h3 class="section-header" on:click={() => toggleCollapse(index)} aria-expanded={!section.isCollapsed}>
-        <span>{section.title}</span>
-        <span class="chevron-icon">
-          {#if section.isCollapsed}
-            <!-- Down chevron -->
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 3L5 7L9 3" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          {:else}
-            <!-- Up chevron -->
-            <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 7L5 3L9 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          {/if}
-        </span>
-      </h3>
-      {#if !section.isCollapsed}
-        <div transition:slide={{ duration: 500 }}>
-          {#each section.content as block}
-            {#if block.type === 'text'}
-              <p>{block.value}</p>
-            {:else if block.type === 'chart'}
-              <div class="chart-container">
-                <svelte:component this={componentMap[block.component]} />
-              </div>
+  <div class="sidebar-content">
+    <!-- Header Section -->
+    <header>
+      <h1>How much housing could be built on the parking lots of NYC?</h1>
+      <h2>A lot, actually</h2>
+      <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
+    </header>
+    
+    <!-- Render each section -->
+    {#each sections as section, index}
+      <div class="section">
+        <h3 class="section-header" on:click={() => toggleCollapse(index)} aria-expanded={!section.isCollapsed}>
+          <span>{section.title}</span>
+          <span class="chevron-icon">
+            {#if section.isCollapsed}
+              <!-- Down chevron -->
+              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 3L5 7L9 3" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            {:else}
+              <!-- Up chevron -->
+              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 7L5 3L9 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             {/if}
-          {/each}
-        </div>
-      {/if}
-    </div>
-  {/each}
+          </span>
+        </h3>
+        {#if !section.isCollapsed}
+          <div transition:slide={{ duration: 500 }}>
+            {#each section.content as block}
+              {#if block.type === 'text'}
+                <p>{block.value}</p>
+              {:else if block.type === 'chart'}
+                <div class="chart-container">
+                  <svelte:component this={componentMap[block.component]} />
+                </div>
+              {/if}
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/each}
+  </div>
 </div>
 
 <!-- Open Sidebar Button (Visible when Sidebar is hidden) -->

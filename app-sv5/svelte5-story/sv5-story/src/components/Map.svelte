@@ -17,11 +17,28 @@
   let map;
   const dispatch = createEventDispatcher();
   let mapShown = false; // flag to show map only once
+  let initialAnimationComplete = false; // Track if initial animation has played
   
   // Initialize coordinate display variables
-  let cursorLng = '-74.000';
+  let cursorLng = '-74.00';
   let cursorLat = '40.700';
   let cursorZoom = '9.8';
+
+  // Function to handle the initial zoom animation
+  function playInitialAnimation() {
+    if (!map || initialAnimationComplete) return;
+    
+    map.flyTo({
+      center: [-74.1009, 40.7000],
+      zoom: 9.9,
+      bearing: 0,
+      pitch: 0,
+      duration: 5000, // Animation duration in milliseconds (12 seconds)
+      essential: true
+    });
+    
+    initialAnimationComplete = true;
+  }
 
   // // Fly-to function remains unchanged.
   // const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14) => {
@@ -46,12 +63,12 @@
       container: 'map',
       attributionControl: false,
       style: '/mapTO-light.json',
-      center: [-74.000, 40.700],
-      zoom: 9.8,
-      maxBounds: [
-        [-74.9, 40.4],
-        [-73.5, 41.0]
-      ]
+      center: [-73.9748, 40.6935], // Starting position for the animation
+      zoom: 8.7, // Starting zoom level
+      // maxBounds: [
+      //   [-74.9, 40.4],
+      //   [-73.5, 41.0]
+      // ]
     });
 
     // Add mousemove event handler
@@ -394,11 +411,13 @@
           }
         });
   
-        // Use map idle event to display the map container after all layers have loaded.
+        // Use map idle event to display the map container and start animation
         map.on('idle', () => {
           if (!mapShown) {
             document.getElementById('map').style.display = 'block';
             mapShown = true;
+            // Start the animation after a short delay to ensure smooth transition
+            setTimeout(playInitialAnimation, 1000);
           }
         });
   
@@ -440,9 +459,53 @@
     pointer-events: none;  /* Allow clicking through the box */
     user-select: none;  /* Prevent text selection */
   }
+
+  .legend {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+
+  .legend-gradient {
+    width: 200px;
+    height: 20px;
+    margin-bottom: 5px;
+    background: linear-gradient(to right,
+      rgba(220,250,250,0) 0%,
+      rgba(229,280,270,0.5) 20%,
+      rgb(153,216,215) 40%,
+      rgb(102,194,184) 60%,
+      rgb(44,162,165) 80%,
+      rgb(0,109,130) 100%
+    );
+  }
+
+  .legend-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+  }
 </style>
   
 <div id="map"></div>
 <div class="coordinates-box">
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
+</div>
+<div class="legend">
+  <div>Housing Unit Potential</div>
+  <div class="legend-gradient"></div>
+  <div class="legend-labels">
+    <span>0</span>
+    <span>250</span>
+    <span>500</span>
+    <span>750</span>
+    <span>1000+</span>
+  </div>
 </div>

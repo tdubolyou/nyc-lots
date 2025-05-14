@@ -13,26 +13,28 @@
 
     // Extract properties and group by borough and year
     const properties = devData.features.map(f => f.properties);
-    const groupedData = d3.rollups(
-      properties,
-      v => ({
-        avg_units_ha: d3.mean(v, d => d.Units_HA)
-      }),
-      d => d.boro_name,
-      d => d.year
-    ).map(([boro, yearData]) => ({
-      borough: boro,
-      values: yearData.map(([year, data]) => ({
-        year: +year,
-        avg_units_ha: data.avg_units_ha
-      }))
-    }));
 
-    // Set up dimensions
+    // Group and calculate averages by borough and year
+    const groupedData = d3.groups(properties, d => d.Borough)
+      .map(([borough, boroughData]) => {
+        const yearlyData = d3.groups(boroughData, d => d.YearBuilt)
+          .map(([year, yearData]) => ({
+            year: +year % 100, // Convert to 2-digit year
+            avg_units_ha: d3.mean(yearData, d => d.UnitsHA)
+          }))
+          .sort((a, b) => a.year - b.year); // Sort by year
+
+        return {
+          borough: borough,
+          values: yearlyData
+        };
+      });
+
+    // Set up dimensions - increased height multiplier
     const containerWidth = svg.parentNode.clientWidth;
-    const margin = { top: 40, right: 120, bottom: 40, left: 60 };
+    const margin = { top: 60, right: 140, bottom: 60, left: 80 }; // Increased margins
     const width = containerWidth - margin.left - margin.right;
-    const height = containerWidth * 0.5 - margin.top - margin.bottom;
+    const height = containerWidth * 0.8 - margin.top - margin.bottom; // Increased height ratio
 
     // Clear existing content
     d3.select(svg).selectAll("*").remove();
@@ -44,62 +46,155 @@
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
+    // Add title
+    svgElement.append('text')
+      .attr('x', width / 2)
+      .attr('y', -30)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .text('Density of Recent Housing');
+
     // Set up scales
     const x = d3.scaleLinear()
-      .domain(d3.extent(properties, d => d.year))
+      .domain([
+        d3.min(groupedData, d => d3.min(d.values, v => v.year)),
+        d3.max(groupedData, d => d3.max(d.values, v => v.year))
+      ])
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain([0, d3.max(properties, d => d.Units_HA)])
+      .domain([0, d3.max(groupedData, d => d3.max(d.values, v => v.avg_units_ha))])
       .nice()
       .range([height, 0]);
 
-    // Add axes
+    // Add axes with refined styling
     svgElement.append('g')
       .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')));
+      .call(d3.axisBottom(x).ticks(8).tickFormat(d => `'${d3.format('02d')(d)}`))
+      .style('font-size', '12px')
+      .call(g => g.select('.domain').attr('stroke-opacity', 0.2))
+      .call(g => g.selectAll('.tick line').attr('stroke-opacity', 0.2));
 
     svgElement.append('g')
-      .call(d3.axisLeft(y).ticks(5));
+      .call(d3.axisLeft(y).ticks(6))
+      .style('font-size', '12px')
+      .call(g => g.select('.domain').attr('stroke-opacity', 0.2))
+      .call(g => g.selectAll('.tick line')
+        .attr('x2', width)
+        .attr('stroke-opacity', 0.2));
 
-    // Create line generator
+    // Add axis labels
+    svgElement.append('text')
+      .attr('x', -height/2)
+      .attr('y', -60)
+      .attr('transform', 'rotate(-90)')
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '14px')
+      .text('Average Units per Hectare');
+
+    svgElement.append('text')
+      .attr('x', width/2)
+      .attr('y', height + 40)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '14px')
+      .text('Year Built');
+
+    // Create line generator with curve
     const line = d3.line()
       .x(d => x(d.year))
-      .y(d => y(d.avg_units_ha));
+      .y(d => y(d.avg_units_ha))
+      .curve(d3.curveMonotoneX);
 
-    // Add lines for each borough
-    groupedData.forEach(borough => {
-      const path = svgElement.append('path')
+    // Sort boroughs by final y-value to handle label placement
+    groupedData.sort((a, b) => {
+      const aLastY = a.values[a.values.length - 1].avg_units_ha;
+      const bLastY = b.values[b.values.length - 1].avg_units_ha;
+      return bLastY - aLastY;
+    });
+
+    // Add lines and points for each borough
+    groupedData.forEach((borough, i) => {
+      // Add the line
+      svgElement.append('path')
         .datum(borough.values)
         .attr('fill', 'none')
-        .attr('stroke', '#FF5A30')
-        .attr('stroke-width', 2)
+        .attr('stroke', '#de4f31')
+        .attr('stroke-width', 2.5)
+        .attr('opacity', 0.8)
         .attr('d', line);
 
-      // Add points and labels
-      borough.values.forEach(d => {
-        svgElement.append('circle')
-          .attr('cx', x(d.year))
-          .attr('cy', y(d.avg_units_ha))
-          .attr('r', 3)
-          .attr('fill', '#FF5A30');
+      // Create a group for each data point
+      const points = svgElement.selectAll(`.point-group-${borough.borough}`)
+        .data(borough.values)
+        .enter()
+        .append('g')
+        .attr('class', `point-group-${borough.borough}`);
 
-        svgElement.append('text')
-          .attr('x', x(d.year))
-          .attr('y', y(d.avg_units_ha) - 10)
-          .attr('text-anchor', 'middle')
-          .attr('font-size', '10px')
-          .text(d3.format('.1f')(d.avg_units_ha));
+      // Add points
+      points.append('circle')
+        .attr('cx', d => x(d.year))
+        .attr('cy', d => y(d.avg_units_ha))
+        .attr('r', 3)
+        .attr('fill', '#de4f31')
+        .attr('opacity', 0.8);
+
+      // Add labels (initially hidden)
+      points.append('text')
+        .attr('x', d => x(d.year))
+        .attr('y', d => y(d.avg_units_ha) - 12)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '12px')
+        .attr('font-weight', '500')
+        .text(d => d3.format('.1f')(d.avg_units_ha))
+        .style('opacity', 0);
+
+      // Add hover interactions
+      points.on('mouseenter', function() {
+        d3.select(this).select('text')
+          .style('opacity', 1);
+        d3.select(this).select('circle')
+          .attr('r', 5)
+          .attr('opacity', 1);
+      })
+      .on('mouseleave', function() {
+        d3.select(this).select('text')
+          .style('opacity', 0);
+        d3.select(this).select('circle')
+          .attr('r', 3)
+          .attr('opacity', 0.8);
       });
 
-      // Add borough name at the end of line
+      // Add borough name at the end of line with smarter label placement
       const lastPoint = borough.values[borough.values.length - 1];
+      const labelHeight = 18;
+      const baseY = y(lastPoint.avg_units_ha);
+      
+      let labelY = baseY;
+      if (i > 0) {
+        const prevY = y(groupedData[i-1].values[groupedData[i-1].values.length-1].avg_units_ha);
+        if (Math.abs(labelY - prevY) < labelHeight) {
+          labelY = prevY + labelHeight;
+        }
+      }
+      
+      if (Math.abs(labelY - baseY) > 2) {
+        svgElement.append('line')
+          .attr('x1', x(lastPoint.year))
+          .attr('y1', baseY)
+          .attr('x2', x(lastPoint.year) + 10)
+          .attr('y2', labelY)
+          .attr('stroke', '#de4f31')
+          .attr('stroke-width', 1)
+          .attr('opacity', 0.8);
+      }
+      
       svgElement.append('text')
-        .attr('x', x(lastPoint.year) + 10)
-        .attr('y', y(lastPoint.avg_units_ha))
+        .attr('x', x(lastPoint.year) + 12)
+        .attr('y', labelY)
         .attr('dominant-baseline', 'middle')
-        .attr('font-size', '12px')
-        .attr('font-weight', 'bold')
+        .attr('font-size', '14px')
+        .attr('font-weight', '500')
         .text(borough.borough);
     });
   });
@@ -112,12 +207,15 @@
 <style>
   .chart-container {
     width: 100%;
-    max-width: 1000px;
+    max-width: 1200px; /* Increased from 1000px */
     margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
   }
   
   svg {
     width: 100%;
     height: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 </style>
