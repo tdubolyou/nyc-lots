@@ -130,25 +130,16 @@
       </div>
       
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque fermentum commodo neque, at bibendum massa blandit a.
-        Vivamus sed aliquam velit. Sed eget justo et diam fermentum scelerisque quis a nibh.
+        New York City is in the grip of a deepening housing crisis. With rents at record highs—climbing over 30% in some neighborhoods since 2020 (NY Times, 2024)—and a near-record low vacancy rate of just 1.4% (NY Times, 2024), the city is struggling to keep up with demand. Despite adding between 12,000 and 30,000 units annually over the past decade (NYC Comptroller, 2023), this growth lags behind population needs, especially in transit-accessible areas. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots—remnants of outdated zoning laws and a car-first mindset that no longer fits the reality of 21st-century urban life. What if we reimagined these spaces? What if, instead of housing cars, they housed people?
       </p>
+
       <p>
-        Fusce at augue ac nisl viverra tempus. Suspendisse in sagittis libero. Integer in leo justo. Vestibulum in tristique neque.
-        Praesent tincidunt consectetur feugiat.
+        In this analysis, we map and quantify the city’s surface parking lots, focusing on those within an 800-meter radius of MTA stations—the areas best suited for new housing. By overlaying land use data from PLUTO and the city’s open data portal with transit accessibility, we estimate the number of potential housing units that could replace these underutilized lots. The total housing stock in NYC was approximately 3,705,000 units in 2023 (NYC Comptroller, 2023), yet demand continues to outpace supply. The results of our analysis are striking: converting even a fraction of these sites could add tens of thousands of homes, potentially filling a significant portion of the city’s housing gap. Would this be a silver bullet for affordability? No—but every additional unit helps ease pressure on the market, and placing new housing near transit aligns with the broader goals of sustainability and livability.
       </p>
-      <p>
-        Curabitur fermentum nunc a diam pharetra, at sodales turpis aliquet. Integer iaculis odio ac leo pellentesque, sed accumsan
-        ipsum efficitur. Donec sit amet odio nec nulla semper vehicula.
-
-        Laboris minim reprehenderit magna eu voluptate non id elit ipsum. Eu fugiat laboris irure ad aute nostrud velit amet anim anim. Ullamco exercitation aliqua dolore ullamco ea. Tempor quis minim ea aliquip. Dolor veniam sit do commodo fugiat consectetur magna officia. Amet reprehenderit velit aliqua non minim dolore sint duis in.
-
-        Est nulla exercitation enim elit dolor. Labore laborum elit commodo eiusmod pariatur non dolor fugiat consectetur in velit do minim. Veniam adipisicing in ea laboris est.
-
-        Eu elit nulla ex fugiat deserunt excepteur labore nostrud ad. Consectetur nulla Lorem reprehenderit adipisicing dolore id dolore sit veniam ex aliqua irure qui. Consequat aliquip laboris sint laboris reprehenderit reprehenderit id magna consectetur laborum ad velit Lorem duis. Laborum sint est quis exercitation non magna sint Lorem labore occaecat esse sint dolor.
-
-        Incididunt adipisicing eiusmod do quis qui sit. Nulla nostrud esse aliquip aute est nostrud commodo eu qui eiusmod ad. Ipsum non fugiat aute dolore. Anim veniam sunt eu ea enim aliquip qui elit adipisicing. Id consequat amet sint reprehenderit quis. Anim ea Lorem consectetur est cupidatat aute laborum do cupidatat.
-        </p>
+      <p>  
+        The question is no longer whether we should rethink these spaces, but how quickly we can act. Surface parking may have once been a necessary urban fixture, but in a city where land is as precious as gold, the logic no longer holds. Housing near transit lowers carbon emissions, reduces commuting costs, and fosters more walkable, vibrant neighborhoods. Other global cities have already taken bold steps in this direction—NYC risks falling behind. If we are serious about tackling the housing crisis, it’s time to challenge the assumption that parking deserves a premium spot in our urban fabric.
+      </p>
+    
     </div>
   </div>
 {/if}

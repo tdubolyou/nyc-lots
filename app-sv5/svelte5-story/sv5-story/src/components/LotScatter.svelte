@@ -123,7 +123,21 @@
         .attr('fill', '#FF3300')
         .attr('opacity', 0.6)
         .attr('stroke', '#FF3300')
-        .attr('stroke-width', 1);
+        .attr('stroke-width', 1)
+        .style('cursor', 'pointer')
+        .style('transition', 'all 0.2s ease-in-out')
+        .on('mouseover', function() {
+          d3.select(this)
+            .attr('opacity', 0.8)
+            .attr('stroke-width', 2)
+            .attr('stroke', '#FF1100');
+        })
+        .on('mouseout', function() {
+          d3.select(this)
+            .attr('opacity', 0.6)
+            .attr('stroke-width', 1)
+            .attr('stroke', '#FF3300');
+        });
   
       // Add borough labels
       svgElement.selectAll('text.boro-label')
@@ -222,4 +236,3 @@
       fill: #666666;
     }
   </style>
-  

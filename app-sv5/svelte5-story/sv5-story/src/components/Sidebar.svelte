@@ -3,6 +3,7 @@
   import BoroChart from './BoroChart.svelte';
   import LotSizeChart from './LotSize.svelte';
   import LotScatterChart from './LotScatter.svelte';
+  import DevLine from './DevLine.svelte'
   
   export let flyTo; // Function passed in from the parent component to handle map flyTo
 
@@ -12,7 +13,8 @@
   const componentMap = {
     BoroChart: BoroChart,
     LotSizeChart: LotSizeChart,
-    LotScatterChart: LotScatterChart
+    LotScatterChart: LotScatterChart,
+    DevLine: DevLine
     // Add additional chart/component mappings here if needed.
   };
 
@@ -23,7 +25,7 @@
       content: [
         { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of subway stations that were in both the PLUTO database and the City of NYC mapping. Having said that it's not as many as I might have thought. Let's have a look." },
         { type: "chart", component: "BoroChart" },
-        { type: "text", value: "Across all 5 boroughs there are XXX parking lots. The breakdown by borough is as shown below. XX has the most, and XX has the least. Spatially, they are generally distributed around the outsides of the subway network." }
+        { type: "text", value: "Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below. Spatially, they are generally distributed around the outsides of the subway network." }
       ],
       coordinates: [-73.856077, 40.848447],
       zoomLevel: 14,
@@ -46,7 +48,8 @@
     { 
       title: "What typically gets built in each borough?", 
       content: [
-        { type: "text", value: "Analysis of the map data." }
+        { type: "text", value: "Analysis of the map data." },
+        { type: "chart", component: "DevLine" }  
       ],
       coordinates: [-73.856077, 40.848447],
       zoomLevel: 15, 
