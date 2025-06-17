@@ -23,13 +23,13 @@
     { 
       title: "How many surface lots are there in NYC?", 
       content: [
-        { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of subway stations that were in both the PLUTO database and the City of NYC mapping. Having said that it's not as many as I might have thought. Let's have a look." },
+        { type: "text", value: "There are a lot. Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below. Spatially, they are generally distributed around the outsides of the subway network. Let's have a look."},
         { type: "chart", component: "BoroChart" },
-        { type: "text", value: "Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below. Spatially, they are generally distributed around the outsides of the subway network." }
+        { type: "text", value:  "I narrowed it down to lots within 800m of subway stations that were in both the PLUTO database and the City of NYC mapping. Having said that it's not as many as I might have guessed." }
       ],
-      coordinates: [-73.856077, 40.848447],
-      zoomLevel: 14,
-      isCollapsed: true,
+      coordinates: [-74.1009, 40.7000],
+      zoomLevel: 9.9,
+      isCollapsed: false,
       layerOn: [],
       layerOff: []
     },
@@ -70,6 +70,8 @@
     }
   ];
     
+  let currentSectionIndex = 0;
+
   function closeSidebar() {
     sidebarVisible = false;
   }
@@ -78,12 +80,44 @@
     sidebarVisible = true;
   }
   
-  // Toggle the selected section and collapse others.
+  function navigateToSection(index) {
+    // Ensure index is within bounds
+    if (index < 0) index = sections.length - 1;
+    if (index >= sections.length) index = 0;
+    
+    // Close all sections first
+    sections = sections.map(section => ({ ...section, isCollapsed: true }));
+    
+    // Open the target section
+    sections[index].isCollapsed = false;
+    
+    // Update current index
+    currentSectionIndex = index;
+    
+    // Trigger the flyTo for the section
+    flyTo(
+      sections[index].coordinates,
+      sections[index].zoomLevel,
+      sections[index].layerOn || [],
+      sections[index].layerOff || []
+    );
+  }
+
+  function nextSection() {
+    navigateToSection(currentSectionIndex + 1);
+  }
+
+  function previousSection() {
+    navigateToSection(currentSectionIndex - 1);
+  }
+
+  // Update toggleCollapse to maintain currentSectionIndex
   function toggleCollapse(index) {
     sections = sections.map((section, i) => {
       if (i === index) {
         section.isCollapsed = !section.isCollapsed;
         if (!section.isCollapsed) {
+          currentSectionIndex = index;
           flyTo(
             section.coordinates,
             section.zoomLevel,
@@ -105,14 +139,16 @@
     border-right: 1px solid #e5e5e5;
     height: 100vh;
     width: 400px;
-    position: absolute;
+    position: fixed;
     left: 0;
+    top: 0;
     transition: transform 0.4s ease;
     font-family: 'Barlow', sans-serif;
     color: #333;
     z-index: 999;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
   }
   
   .sidebar-content {
@@ -133,10 +169,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
   }
   
   .section-header:hover {
-    text-decoration: underline;
+    background-color: rgba(0, 0, 0, 0.05);
   }
   
   header h1, header h2, header p {
@@ -180,24 +219,37 @@
     cursor: pointer;
     font-size: 1.2rem;
     color: #555;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+  }
+  
+  .collapse-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
   }
   
   .open-button {
-    position: absolute;
+    position: fixed;
     z-index: 1000;
-    top: 10px;
-    left: 10px;
+    top: 20px;
+    left: 20px;
     background: #FF5A30;
     border: none;
     cursor: pointer;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     color: #fff;
     font-size: 1.2rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+  }
+  
+  .open-button:hover {
+    transform: scale(1.05);
   }
   
   .chevron-icon {
@@ -205,6 +257,102 @@
     margin-left: 0.5rem;
     vertical-align: middle;
     transition: transform 0.4s ease;
+  }
+  
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40vh;
+      border-right: none;
+      border-top: 1px solid #e5e5e5;
+      transform: translateY(100%);
+    }
+
+    .sidebar:not(.sidebar-hidden) {
+      transform: translateY(0);
+    }
+
+    .sidebar-hidden {
+      transform: translateY(100%);
+    }
+
+    .open-button {
+      top: auto;
+      bottom: 20px;
+      left: 20px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+    }
+
+    header h2 {
+      font-size: 0.9rem;
+    }
+
+    .section-header {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+    }
+  }
+  
+  /* Small Mobile Devices */
+  @media (max-width: 480px) {
+    .sidebar {
+      height: 50vh;
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+    }
+
+    .section-header {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e5e5;
+    
+  }
+
+  .nav-button {
+    background: #FF5A30;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    flex: 1;
+    margin: 0 0.5rem;
+  }
+
+  .nav-button:first-child {
+    margin-left: 0;
+  }
+
+  .nav-button:last-child {
+    margin-right: 0;
+  }
+
+  .nav-button:hover {
+    background: #e54a20;
+  }
+
+  .nav-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 </style>
 
@@ -220,6 +368,16 @@
       <h2>A lot, actually</h2>
       <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
     </header>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-buttons">
+      <button class="nav-button" on:click={previousSection} aria-label="Previous section">
+        ← Previous
+      </button>
+      <button class="nav-button" on:click={nextSection} aria-label="Next section">
+        Next →
+      </button>
+    </div>
     
     <!-- Render each section -->
     {#each sections as section, index}

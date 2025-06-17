@@ -13,6 +13,7 @@
   import mask from '../data/mask.json';
   import boro from '../data/boro.json';
   import borolabel from '../data/boro_pt.json';
+  //import { openSection } from './Sidebar.svelte';
 
   let map;
   const dispatch = createEventDispatcher();
@@ -38,6 +39,11 @@
     });
     
     initialAnimationComplete = true;
+
+    // Open the first sidebar section after the animation
+    setTimeout(() => {
+      openSection.set(0);
+    }, 5000); // Match the duration of the flyTo
   }
 
   // // Fly-to function remains unchanged.
@@ -331,9 +337,9 @@
             'heatmap-weight': [
               'interpolate',
               ['linear'],
-              ['get', 'estimated_units'],
+              ['get', 'Area_HA'],
               0, 0,
-              1000, 1
+              30, 1
             ],
             'heatmap-intensity': [
               'interpolate',
@@ -442,11 +448,11 @@
   #map {
     height: 100vh;
     width: 100%;
-    display: none; /* Hide the map initially */
+    display: none;
   }
   
   .coordinates-box {
-    position: absolute;
+    position: fixed;
     top: 20px;
     right: 20px;
     padding: 10px;
@@ -454,14 +460,14 @@
     border-radius: 4px;
     font-family: monospace;
     font-size: 12px;
-    z-index: 1000;  /* Increased z-index */
+    z-index: 1000;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    pointer-events: none;  /* Allow clicking through the box */
-    user-select: none;  /* Prevent text selection */
+    pointer-events: none;
+    user-select: none;
   }
 
   .legend {
-    position: absolute;
+    position: fixed;
     bottom: 30px;
     right: 30px;
     padding: 10px;
@@ -491,6 +497,51 @@
     display: flex;
     justify-content: space-between;
     font-size: 10px;
+  }
+
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    .coordinates-box {
+      top: 10px;
+      right: 10px;
+      font-size: 10px;
+      padding: 8px;
+    }
+
+    .legend {
+      top: 20px;
+      right: 20px;
+      bottom: auto;
+      padding: 8px;
+      font-size: 10px;
+    }
+
+    .legend-gradient {
+      width: 150px;
+      height: 15px;
+    }
+
+    .legend-labels {
+      font-size: 8px;
+    }
+  }
+
+  /* Small Mobile Devices */
+  @media (max-width: 480px) {
+    .coordinates-box {
+      display: none;
+    }
+
+    .legend {
+      top: 15px;
+      right: 15px;
+      padding: 6px;
+    }
+
+    .legend-gradient {
+      width: 120px;
+      height: 12px;
+    }
   }
 </style>
   

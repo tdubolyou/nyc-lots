@@ -68,18 +68,45 @@
 	.app {
 		display: flex;
 		position: relative;
+		width: 100%;
+		height: 100vh;
+		overflow: hidden;
 	}
 
 	.map-container {
 		flex: 1;
 		height: 100vh;
+		width: 100%;
 		overflow: hidden;
-		transition: opacity 0.5s ease-in-out;
-		opacity: 0; /* Hide the map initially */
+		transition: all 0.4s ease;
+		opacity: 0;
 	}
 
 	.map-container.visible {
-		opacity: 1; /* Fade in the map once the splash is dismissed */
+		opacity: 1;
+	}
+
+	/* Mobile Responsive Styles */
+	@media (max-width: 768px) {
+		.app {
+			flex-direction: column;
+		}
+
+		.map-container {
+			height: 60vh;
+			width: 100%;
+		}
+		
+		.map-container.sidebar-visible {
+			width: 100%;
+		}
+	}
+
+	/* Small Mobile Devices */
+	@media (max-width: 480px) {
+		.map-container {
+			width: 100%;
+		}
 	}
 </style>
 
