@@ -36,11 +36,11 @@
     { 
       title: "How big are they?", 
       content: [
-        { type: "text", value: "Sint voluptate id sunt est sint. Sint elit pariatur deserunt nisi duis culpa amet tempor magna quis. In dolore laboris voluptate ad excepteur velit ex velit minim occaecat in cillum. Ut et anim nisi tempor nostrud adipisicing.  Dolor deserunt consectetur dolore eu sunt duis ex sit eiusmod commodo reprehenderit adipisicing minim. Ex proident fugiat culpa quis proident eu magna cillum aliquip deserunt amet pariatur consectetur. Do ullamco aliquip sunt occaecat velit sunt culpa velit enim eu adipisicing.  Dolore exercitation sunt sunt excepteur proident irure. Incididunt velit nostrud Lorem exercitation dolor non amet. Sit nisi tempor ea exercitation velit minim quis deserunt id velit. Incididunt enim tempor laboris mollit sunt sit nisi eu id. Duis veniam dolor nisi dolor exercitation sint cupidatat laborum et nostrud. Dolor consectetur eiusmod excepteur cillum consequat. Enim consectetur fugiat amet Lorem labore." },
+        { type: "text", value: "There is a big spread.  There are XX sites over 10 HA, there are tons of smaller lots.  Teh chart below shows the average size of the lots and the total area of the lots by burough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." },
         { type: "chart", component: "LotScatterChart" }      
       ],
-      coordinates: [-73.856077, 40.848447],
-      zoomLevel: 16,
+      coordinates: [-73.9427, 40.6544],
+      zoomLevel: 11.3,
       isCollapsed: true,
       layerOn: [],
       layerOff: []
@@ -48,7 +48,7 @@
     { 
       title: "What typically gets built in each borough?", 
       content: [
-        { type: "text", value: "Analysis of the map data." },
+        { type: "text", value: "I looked at development within the same catchment that was built within the last 10 years, according to PLUTO. Clearly the highest density borough is Manhattan. Despite lower densities in 2017-19,the average desity has been increasong slightly and sits in the mid 70s (units/ha). Staten Island has the lowest average density and it has been arouns 4.5 units/ha over the 10 year period. While recent development in the bronx has been lower density, there is an overall increasing trend. The average over 10 years is 31 units/ha.  In Brooklyn densities have increased significantly in recent years, up to 60 units/ha in 2023. the average over the 10 year period is 41." },
         { type: "chart", component: "DevLine" }  
       ],
       coordinates: [-73.856077, 40.848447],
@@ -60,7 +60,7 @@
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "Final thoughts and conclusions." }
+        { type: "text", value: "When combining these factors - area and historic density, we get a sens of the housing potential of these surface lots. Looking at the total number based on the average, we see 62528 units. This is a decent amount In the context of housing need, its XX% of the unmet demand. If on were to apply the average of the last 3 years, we would see significantly increased yields, up to 100k units. Have at it." }
       ],
       coordinates: [-73.856077, 40.848447],
       zoomLevel: 13,
