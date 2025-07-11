@@ -23,15 +23,14 @@
     { 
       title: "How many surface lots are there in NYC?", 
       content: [
-        { type: "text", value: "There are a lot. Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below. Spatially, they are generally distributed around the outsides of the subway network. Let's have a look."},
+        { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of MTA stations that were in both the PLUTO database and the City' parking lot data. Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below."},
         { type: "chart", component: "BoroChart" },
-        { type: "text", value:  "I narrowed it down to lots within 800m of subway stations that were in both the PLUTO database and the City of NYC mapping. Having said that it's not as many as I might have guessed." }
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
-      isCollapsed: false,
-      layerOn: [],
-      layerOff: []
+      isCollapsed: true,
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
     },
     { 
       title: "How big are they?", 
@@ -42,8 +41,8 @@
       coordinates: [-73.9427, 40.6544],
       zoomLevel: 11.3,
       isCollapsed: true,
-      layerOn: [],
-      layerOff: []
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
     },
     { 
       title: "What typically gets built in each borough?", 
@@ -51,22 +50,22 @@
         { type: "text", value: "I looked at development within the same catchment that was built within the last 10 years, according to PLUTO. Clearly the highest density borough is Manhattan. Despite lower densities in 2017-19,the average desity has been increasong slightly and sits in the mid 70s (units/ha). Staten Island has the lowest average density and it has been arouns 4.5 units/ha over the 10 year period. While recent development in the bronx has been lower density, there is an overall increasing trend. The average over 10 years is 31 units/ha.  In Brooklyn densities have increased significantly in recent years, up to 60 units/ha in 2023. the average over the 10 year period is 41." },
         { type: "chart", component: "DevLine" }  
       ],
-      coordinates: [-73.856077, 40.848447],
-      zoomLevel: 15, 
+      coordinates: [-73.9938, 40.7512],
+      zoomLevel: 13.32, 
       isCollapsed: true,
-      layerOn: ['dev_par_fill'],
+      layerOn: ['dev_pts_heatmap', 'dev_par_fill'],
       layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par']
     },
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "When combining these factors - area and historic density, we get a sens of the housing potential of these surface lots. Looking at the total number based on the average, we see 62528 units. This is a decent amount In the context of housing need, its XX% of the unmet demand. If on were to apply the average of the last 3 years, we would see significantly increased yields, up to 100k units. Have at it." }
+        { type: "text", value: "When combining these factors - area and historic density, we get a sense of the housing potential of these surface lots. Looking at the total number based on the average, we see 62528 units. This is a decent amount In the context of housing need, its XX% of the unmet demand. If on were to apply the average of the last 3 years, we would see significantly increased yields, up to 100k units. Have at it." }
       ],
-      coordinates: [-73.856077, 40.848447],
-      zoomLevel: 13,
+      coordinates: [-74.1009, 40.7000],
+      zoomLevel: 9.9,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill'],
-      layerOff: []
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
     }
   ];
     
@@ -148,13 +147,13 @@
     z-index: 999;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
   }
   
   .sidebar-content {
     padding: 1rem;
     overflow-y: auto;
     flex-grow: 1;
+    padding-bottom: 0;
   }
   
   .sidebar-hidden {
@@ -319,14 +318,18 @@
   .navigation-buttons {
     display: flex;
     justify-content: space-between;
-    padding: 1rem 0;
-    margin-bottom: 1rem;
+    padding: 1rem;
     border-bottom: 1px solid #e5e5e5;
+    border-top: 1px solid #e5e5e5;
+    background: #ffffff;
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
     
   }
 
   .nav-button {
-    background: #FF5A30;
+    background: #888382FF;
     color: white;
     border: none;
     padding: 0.5rem 1rem;
@@ -354,6 +357,21 @@
     background: #ccc;
     cursor: not-allowed;
   }
+  
+  .introduction {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 16px;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  
+  .section p {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 16px;
+    padding: 0.5rem;
+    line-height: 1.6;
+  }
 </style>
 
 <!-- Sidebar Container -->
@@ -367,18 +385,11 @@
       <h1>How much housing could be built on the parking lots of NYC?</h1>
       <h2>A lot, actually</h2>
       <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
+      <p class="introduction">
+        This analysis explores the potential for housing development on surface parking lots near transit stations across New York City. By examining lot sizes, locations, and development patterns, we can estimate how many new housing units could be created in these underutilized spaces.
+      </p>
     </header>
 
-    <!-- Navigation Buttons -->
-    <div class="navigation-buttons">
-      <button class="nav-button" on:click={previousSection} aria-label="Previous section">
-        ← Previous
-      </button>
-      <button class="nav-button" on:click={nextSection} aria-label="Next section">
-        Next →
-      </button>
-    </div>
-    
     <!-- Render each section -->
     {#each sections as section, index}
       <div class="section">
@@ -413,6 +424,16 @@
         {/if}
       </div>
     {/each}
+  </div>
+  
+  <!-- Navigation Buttons -->
+  <div class="navigation-buttons">
+    <button class="nav-button" on:click={previousSection} aria-label="Previous section">
+      ← Previous
+    </button>
+    <button class="nav-button" on:click={nextSection} aria-label="Next section">
+      Next →
+    </button>
   </div>
 </div>
 

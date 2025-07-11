@@ -1,5 +1,27 @@
 <script>
   export let onClose; // Function to close or hide the splash
+  import { onMount } from 'svelte';
+  let scrolled = false;
+  let overlayEl;
+
+  function handleScroll() {
+    if (overlayEl && overlayEl.scrollTop > 10) {
+      scrolled = true;
+    } else {
+      scrolled = false;
+    }
+  }
+
+  onMount(() => {
+    if (overlayEl) {
+      overlayEl.addEventListener('scroll', handleScroll);
+    }
+    return () => {
+      if (overlayEl) {
+        overlayEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  });
 </script>
 
 <style>
@@ -35,7 +57,7 @@
     background: white;
     padding: 2rem;
     border-radius: 8px;
-    max-width: 600px;
+    max-width: 650px;
     z-index: 1;
     max-height: 90vh; /* Restrict height to enable scrolling */
     overflow-y: auto; /* Enable scrolling when content overflows */
@@ -114,20 +136,43 @@
     font-family: Georgia, 'Times New Roman', Times, serif;
     padding: 0.5rem;
   }
+  .down-arrow {
+    position: absolute;
+    left: 50%;
+    bottom: 4rem;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.85;
+    animation: bounce 1.5s infinite;
+    z-index: 10;
+    pointer-events: none;
+    background: rgba(255,255,255,0.7);
+    border-radius: 1.5rem;
+    padding: 0.25rem 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transition: opacity 0.4s;
+  }
+  .down-arrow.fadeout {
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0);}
+    50% { transform: translateY(10px);}
+  }
 </style>
 
 {#if onClose}
   <div class="splash">
     <div class="background"></div>
-    <div class="overlay">
+    <div class="overlay" bind:this={overlayEl}>
       <div class="title">The Parking Lots of NYC</div>
       <div class="subtitle">How Much Housing Could Be Built On Surface Lots Near Transit?</div>
       <div class="byline">By: <a href="https://tomweatherburn.com" target="_blank">Tom Weatherburn</a></div>
       
-      <div class="image-container">
-        <img src="/splash_img.jpg" alt="Splash Image" />
-        <button class="enter-button" on:click={onClose}>ENTER MAP</button>
-      </div>
+
       
       <p>
         New York City is in the grip of a deepening housing crisis. With rents at record highs—climbing over 30% in some neighborhoods since 2020 (NY Times, 2024)—and a near-record low vacancy rate of just 1.4% (NY Times, 2024), the city is struggling to keep up with demand. Despite adding between 12,000 and 30,000 units annually over the past decade (NYC Comptroller, 2023), this growth lags behind population needs, especially in transit-accessible areas. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots—remnants of outdated zoning laws and a car-first mindset that no longer fits the reality of 21st-century urban life. What if we reimagined these spaces? What if, instead of housing cars, they housed people?
@@ -139,7 +184,15 @@
       <p>  
         The question is no longer whether we should rethink these spaces, but how quickly we can act. Surface parking may have once been a necessary urban fixture, but in a city where land is as precious as gold, the logic no longer holds. Housing near transit lowers carbon emissions, reduces commuting costs, and fosters more walkable, vibrant neighborhoods. Other global cities have already taken bold steps in this direction—NYC risks falling behind. If we are serious about tackling the housing crisis, it’s time to challenge the assumption that parking deserves a premium spot in our urban fabric.
       </p>
-    
+      <div class="image-container">
+        <img src="/splash_img.jpg" alt="Splash Image" />
+        <button class="enter-button" on:click={onClose}>ENTER MAP</button>
+      </div>
+    </div>
+    <div class="down-arrow" class:fadeout={scrolled}>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF5A30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </div>
   </div>
 {/if}

@@ -290,12 +290,21 @@
           map.getCanvas().style.cursor = '';
         });
         
+        // Add mouse events for the polygon layer
+        map.on('mouseenter', 'lots_par_fill', () => {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'lots_par_fill', () => {
+          map.getCanvas().style.cursor = '';
+        });
+        
         // Add a click handler with a larger pixel buffer for easier clicking
         map.on('click', (e) => {
           // Use a larger pixel radius (30px) to query features around the click point
           const features = map.queryRenderedFeatures([
-            [e.point.x - 20, e.point.y - 20],
-            [e.point.x + 20, e.point.y + 20]
+            // e.point,
+          [e.point.x - 20, e.point.y - 20],
+          [e.point.x + 20, e.point.y + 20]
           ], { layers: ['lots_pts_popup'] });
           
           if (!features.length) return;
@@ -394,6 +403,61 @@
           }
         });
 
+        // Add dev_pts heatmap layer
+        map.addSource('dev_pts', { type: 'geojson', data: dev_pts });
+        map.addLayer({
+          'id': 'dev_pts_heatmap',
+          'type': 'heatmap',
+          'source': 'dev_pts',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'UnitsHA'],
+              0, 0,
+              100, 1
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 1,
+              9, 3
+            ],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(245,245,220,0)',
+              0.2, 'rgb(222,184,135, 0.5)',
+              0.4, 'rgb(210,180,140)',
+              0.6, 'rgb(160,82,45)',
+              0.8, 'rgb(139,69,19)',
+              1, 'rgb(255,140,0)'
+            ],
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 4,
+              9, 10,
+              14, 20,
+              20, 100
+            ],
+            'heatmap-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.8,
+              14, 0.8,
+              14.01, 0
+            ]
+          }
+        });
+
         // Ensure borough labels use calculated centroids for correct placement
         map.addSource('borolabel', { type: 'geojson', data: borolabel });
         map.addLayer({
@@ -468,7 +532,7 @@
 
   .legend {
     position: fixed;
-    bottom: 30px;
+    top: 30px;
     right: 30px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.9);
@@ -550,7 +614,7 @@
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
 </div>
 <div class="legend">
-  <div>Housing Unit Potential</div>
+  <div>Parking Lot Area (m<sup>2</sup>)</div>
   <div class="legend-gradient"></div>
   <div class="legend-labels">
     <span>0</span>

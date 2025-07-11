@@ -4,6 +4,10 @@
     import lotsData from '../data/lots_pts.json';
   
     let svg;
+    let tooltipVisible = false;
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
   
     onMount(() => {
       if (!lotsData || !lotsData.features) {
@@ -124,20 +128,7 @@
         .attr('opacity', 0.6)
         .attr('stroke', '#FF3300')
         .attr('stroke-width', 1)
-        .style('cursor', 'pointer')
-        .style('transition', 'all 0.2s ease-in-out')
-        .on('mouseover', function() {
-          d3.select(this)
-            .attr('opacity', 0.8)
-            .attr('stroke-width', 2)
-            .attr('stroke', '#FF1100');
-        })
-        .on('mouseout', function() {
-          d3.select(this)
-            .attr('opacity', 0.6)
-            .attr('stroke-width', 1)
-            .attr('stroke', '#FF3300');
-        });
+        .style('cursor', 'pointer');
   
       // Add borough labels
       svgElement.selectAll('text.boro-label')
@@ -164,27 +155,33 @@
         .style('font-weight', '700')
         .text('Parking Lot Distribution by Borough');
   
-      // Add tooltips
-      const tooltip = d3.select(svg.parentNode)
-        .append('div')
-        .attr('class', 'tooltip');
-  
       svgElement.selectAll('circle')
-        .on('mouseover', (event, d) => {
-          tooltip.style('visibility', 'visible')
-            .html(
-              `<strong>${d.boro}</strong><br/>
-               Number of lots: ${d3.format(',')(d.number_of_lots)}<br/>
-               Avg lot size: ${d3.format(',.0f')(d.average_lot_size)} sqm<br/>
-               Total area: ${d3.format(',.0f')(d.total_area)} sqm`
-            );
+        .on('mouseover', function(event, d) {
+          // Visual hover effects
+          d3.select(this)
+            .attr('opacity', 0.9)
+            // .attr('stroke-width', 2)
+            // .attr('stroke', '#000000FF');
+          
+          // Show tooltip
+          tooltipText = `${d.boro}\nNumber of lots: ${d3.format(',')(d.number_of_lots)}\nAvg lot size: ${d3.format(',.0f')(d.average_lot_size)} sqm\nTotal area: ${d3.format(',.0f')(d.total_area)} sqm`;
+          tooltipVisible = true;
+          tooltipX = event.pageX + 15;
+          tooltipY = event.pageY - 50;
         })
         .on('mousemove', (event) => {
-          tooltip.style('top', (event.pageY - 10) + 'px')
-                 .style('left', (event.pageX + 10) + 'px');
+          tooltipX = event.pageX + 15;
+          tooltipY = event.pageY - 50;
         })
-        .on('mouseout', () => {
-          tooltip.style('visibility', 'hidden');
+        .on('mouseout', function() {
+          // Reset visual hover effects
+          d3.select(this)
+            .attr('opacity', 0.6)
+            .attr('stroke-width', 1)
+            .attr('stroke', '#FF3300');
+          
+          // Hide tooltip
+          tooltipVisible = false;
         });
     });
   </script>
@@ -192,6 +189,18 @@
   <div class="chart-container">
     <svg bind:this={svg}></svg>
   </div>
+  
+  {#if tooltipVisible}
+    <div class="tooltip" style="left: {tooltipX}px; top: {tooltipY}px;">
+      {#each tooltipText.split('\n') as line}
+        {#if line.includes(':')}
+          <div><strong>{line.split(':')[0]}:</strong> {line.split(':')[1]}</div>
+        {:else}
+          <div><strong>{line}</strong></div>
+        {/if}
+      {/each}
+    </div>
+  {/if}
   
   <style>
     .chart-container {
@@ -208,17 +217,20 @@
       font-family: 'Barlow', sans-serif;
     }
     .tooltip {
-      position: absolute;
+      position: fixed;
       padding: 8px;
       background: white;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       border-radius: 4px;
       pointer-events: none;
       font-family: 'Barlow', sans-serif;
       font-size: 12px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       z-index: 1000;
-      visibility: hidden;
+      white-space: nowrap;
+      max-width: 200px;
+      color: #333;
+      background: #ffffff;
     }
     :global(.chart-container .domain) {
       stroke: #cccccc;
