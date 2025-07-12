@@ -25,6 +25,24 @@
   let cursorLat = '40.700';
   let cursorZoom = '9.8';
 
+  // Reactive legend variables
+  let legendTitle = "Parking Lot Area (m²)";
+  let legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
+  let legendLabels = ["0", "250", "500", "750", "1000+"];
+
+  // Function to update legend from parent component
+  function updateLegend(legendData) {
+    if (legendData) {
+      legendTitle = legendData.title;
+      if (legendData.gradient === "development-gradient") {
+        legendGradientStyle = "linear-gradient(to right, rgba(245,245,220,0) 0%, rgba(245,245,220,0) 5%, rgb(222,184,135,0.5) 20%, rgb(210,180,140) 40%, rgb(160,82,45) 60%, rgb(139,69,19) 80%, rgb(101,67,33) 95%, rgb(69,46,23) 100%)";
+      } else {
+        legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
+      }
+      legendLabels = legendData.labels;
+    }
+  }
+
   // Function to handle the initial zoom animation
   function playInitialAnimation() {
     if (!map || initialAnimationComplete) return;
@@ -46,17 +64,28 @@
     }, 5000); // Match the duration of the flyTo
   }
 
-  // // Fly-to function remains unchanged.
-  // const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14) => {
-  //   if (map) {
-  //     map.flyTo({
-  //       center: coordinates,
-  //       zoom: zoomLevel,
-  //       speed: 0.8,
-  //       curve: 1
-  //     });
-  //   }
-  // };
+  // Updated flyTo function to handle legend data
+  const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = [], legendData = null) => {
+    if (map) {
+      // Update legend if provided
+      if (legendData) {
+        legendTitle = legendData.title;
+        if (legendData.gradient === "development-gradient") {
+          legendGradientStyle = "linear-gradient(to right, rgba(245,245,220,0) 0%, rgba(245,245,220,0) 5%, rgb(222,184,135,0.5) 20%, rgb(210,180,140) 40%, rgb(160,82,45) 60%, rgb(139,69,19) 80%, rgb(101,67,33) 95%, rgb(69,46,23) 100%)";
+        } else {
+          legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
+        }
+        legendLabels = legendData.labels;
+      }
+      
+      map.flyTo({
+        center: coordinates,
+        zoom: zoomLevel,
+        speed: 0.8,
+        curve: 1
+      });
+    }
+  };
 
   onMount(() => {
     // Hide the map container initially
@@ -335,6 +364,13 @@
           .maplibregl-popup .maplibregl-popup-close-button {
             padding: 5px;
           }
+          .dev-popup .maplibregl-popup-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Barlow', sans-serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          }
         `;
         document.head.appendChild(style);
   
@@ -403,6 +439,50 @@
           }
         });
 
+        // Add hover popup for development polygons
+        let devPopup = null;
+        
+        map.on('mouseenter', 'dev_par_fill', (e) => {
+          map.getCanvas().style.cursor = 'pointer';
+          
+          if (e.features.length > 0) {
+            const feature = e.features[0];
+            const props = feature.properties;
+            
+            const content = `
+              <div style="font-size: 14px; line-height: 1.4;">
+                <strong>${props.Address || 'N/A'}</strong><br>
+                Units/HA: <strong>${props.UnitsHA ? Math.round(props.UnitsHA * 10) / 10 : 'N/A'}</strong>
+              </div>
+            `;
+            
+            devPopup = new maplibre.Popup({
+              closeButton: false,
+              closeOnClick: false,
+              className: 'dev-popup'
+            })
+              .setLngLat(e.lngLat)
+              .setHTML(content)
+              .addTo(map);
+          }
+        });
+        
+        map.on('mouseleave', 'dev_par_fill', () => {
+          map.getCanvas().style.cursor = '';
+          if (devPopup) {
+            devPopup.remove();
+            devPopup = null;
+          }
+        });
+        
+        // Remove popup on zoom change
+        map.on('zoom', () => {
+          if (devPopup) {
+            devPopup.remove();
+            devPopup = null;
+          }
+        });
+
         // Add dev_pts heatmap layer
         map.addSource('dev_pts', { type: 'geojson', data: dev_pts });
         map.addLayer({
@@ -418,7 +498,7 @@
               ['linear'],
               ['get', 'UnitsHA'],
               0, 0,
-              100, 1
+              122, 1
             ],
             'heatmap-intensity': [
               'interpolate',
@@ -432,20 +512,22 @@
               ['linear'],
               ['heatmap-density'],
               0, 'rgba(245,245,220,0)',
+              0.05, 'rgba(245,245,220,0)',
               0.2, 'rgb(222,184,135, 0.5)',
               0.4, 'rgb(210,180,140)',
               0.6, 'rgb(160,82,45)',
               0.8, 'rgb(139,69,19)',
-              1, 'rgb(255,140,0)'
+              0.95, 'rgb(101,67,33)',
+              1, 'rgb(69,46,23)'
             ],
             'heatmap-radius': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              0, 4,
-              9, 10,
-              14, 20,
-              20, 100
+              0, 3,
+              9, 8,
+              14, 15,
+              20, 40
             ],
             'heatmap-opacity': [
               'interpolate',
@@ -496,6 +578,8 @@
           console.log('Zoom level:', map.getZoom());
         });
   
+        // Add updateLegend function to the map object
+        map.updateLegend = updateLegend;
         dispatch('mapReady', map);
       } catch (error) {
         console.error('Error adding GeoJSON source to the map:', error);
@@ -544,19 +628,15 @@
   }
 
   .legend-gradient {
-    width: 200px;
     height: 20px;
+    min-width: 200px;
     margin-bottom: 5px;
-    background: linear-gradient(to right,
-      rgba(220,250,250,0) 0%,
-      rgba(229,280,270,0.5) 20%,
-      rgb(153,216,215) 40%,
-      rgb(102,194,184) 60%,
-      rgb(44,162,165) 80%,
-      rgb(0,109,130) 100%
-    );
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    border-radius: 2px;
+    overflow: hidden;
   }
-
+  
   .legend-labels {
     display: flex;
     justify-content: space-between;
@@ -581,8 +661,8 @@
     }
 
     .legend-gradient {
-      width: 150px;
       height: 15px;
+      min-width: 150px;
     }
 
     .legend-labels {
@@ -603,8 +683,8 @@
     }
 
     .legend-gradient {
-      width: 120px;
       height: 12px;
+      min-width: 120px;
     }
   }
 </style>
@@ -614,13 +694,11 @@
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
 </div>
 <div class="legend">
-  <div>Parking Lot Area (m<sup>2</sup>)</div>
-  <div class="legend-gradient"></div>
+  <div>{legendTitle}</div>
+  <div class="legend-gradient" style="background: {legendGradientStyle}"></div>
   <div class="legend-labels">
-    <span>0</span>
-    <span>250</span>
-    <span>500</span>
-    <span>750</span>
-    <span>1000+</span>
+    {#each legendLabels as label}
+      <span>{label}</span>
+    {/each}
   </div>
 </div>

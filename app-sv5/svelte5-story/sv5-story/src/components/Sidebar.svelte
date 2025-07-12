@@ -30,19 +30,29 @@
       zoomLevel: 9.9,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      legend: {
+        title: "Parking Lot Area (m²)",
+        gradient: "parking-gradient",
+        labels: ["0", "250", "500", "750", "1000+"]
+      }
     },
     { 
       title: "How big are they?", 
       content: [
-        { type: "text", value: "There is a big spread.  There are XX sites over 10 HA, there are tons of smaller lots.  Teh chart below shows the average size of the lots and the total area of the lots by burough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." },
+        { type: "text", value: "There is a big spread.  There are 7 sites over 10 HA, there are tons of smaller lots.  The chart below shows the average size of the lots and the total area of the lots by borough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." },
         { type: "chart", component: "LotScatterChart" }      
       ],
       coordinates: [-73.9427, 40.6544],
       zoomLevel: 11.3,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      legend: {
+        title: "Parking Lot Area (m²)",
+        gradient: "parking-gradient",
+        labels: ["0", "250", "500", "750", "1000+"]
+      }
     },
     { 
       title: "What typically gets built in each borough?", 
@@ -54,18 +64,30 @@
       zoomLevel: 13.32, 
       isCollapsed: true,
       layerOn: ['dev_pts_heatmap', 'dev_par_fill'],
-      layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par']
+      layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      legend: {
+        title: "Recent Development Density (units/ha)",
+        gradient: "development-gradient",
+        labels: ["0", "25", "50", "75", "100+"]
+      }
     },
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "When combining these factors - area and historic density, we get a sense of the housing potential of these surface lots. Looking at the total number based on the average, we see 62528 units. This is a decent amount In the context of housing need, its XX% of the unmet demand. If on were to apply the average of the last 3 years, we would see significantly increased yields, up to 100k units. Have at it." }
+        { type: "text", value: "Applying historic density tot he area of the parking lots, gives a sense of the housing potential of these surface lots. Doign so yielded a total of:" },
+        { type: "text", value: "62,528", style: "highlight-number" },
+        { type: "text", value: "Given new untis have ranged from 12K to 30k in recent years, this represents between 2 and 5 years of new supply. If one were to apply the average densityof the last 3 years, we would see significantly increased yields, up to ~100k units." }
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
-      layerOn: ['heatmap', 'lots_par_fill'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill']
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      legend: {
+        title: "Parking Lot Area (m²)",
+        gradient: "parking-gradient",
+        labels: ["0", "250", "500", "750", "1000+"]
+      }
     }
   ];
     
@@ -98,7 +120,8 @@
       sections[index].coordinates,
       sections[index].zoomLevel,
       sections[index].layerOn || [],
-      sections[index].layerOff || []
+      sections[index].layerOff || [],
+      sections[index].legend
     );
   }
 
@@ -121,7 +144,8 @@
             section.coordinates,
             section.zoomLevel,
             section.layerOn || [],
-            section.layerOff || []
+            section.layerOff || [],
+            section.legend
           );
         }
       } else {
@@ -137,7 +161,7 @@
     background: #ffffff;
     border-right: 1px solid #e5e5e5;
     height: 100vh;
-    width: 400px;
+    width: 500px;
     position: fixed;
     left: 0;
     top: 0;
@@ -372,6 +396,17 @@
     padding: 0.5rem;
     line-height: 1.6;
   }
+  
+  /* Style for highlighted numbers */
+  .section p.highlight-number {
+    font-family: 'Barlow', sans-serif;
+    font-size: 88px;
+    font-weight: bold;
+    color: #008080; /* Teal color */
+    text-align: center;
+    margin: 1rem 0;
+    padding: 0.5rem;
+  }
 </style>
 
 <!-- Sidebar Container -->
@@ -413,7 +448,7 @@
           <div transition:slide={{ duration: 500 }}>
             {#each section.content as block}
               {#if block.type === 'text'}
-                <p>{block.value}</p>
+                <p class={block.style || ''}>{block.value}</p>
               {:else if block.type === 'chart'}
                 <div class="chart-container">
                   <svelte:component this={componentMap[block.component]} />

@@ -15,7 +15,7 @@
 	let mapLoaded = false;
 
 	// Define a function to fly to the passed coordinates and zoom level
-	function flyTo(coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = []) {
+	function flyTo(coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = [], legendData = null) {
 		if (mapRef && typeof mapRef.flyTo === 'function') {
 			mapRef.flyTo({
 				center: coordinates,
@@ -36,6 +36,11 @@
 					mapRef.setLayoutProperty(layerId, 'visibility', 'none');
 				}
 			});
+			
+			// Update legend if legend data is provided
+			if (legendData && mapRef.updateLegend) {
+				mapRef.updateLegend(legendData);
+			}
 		} else {
 			console.error('Map reference is not set properly or does not have the flyTo method');
 		}
