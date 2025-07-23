@@ -83,7 +83,7 @@
 
   .byline {
     font-size: 0.8rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     font-weight: 100;
   }
 
@@ -169,20 +169,31 @@
     <div class="background"></div>
     <div class="overlay" bind:this={overlayEl}>
       <div class="title">The Parking Lots of NYC</div>
-      <div class="subtitle">How Much Housing Could Be Built On Surface Lots Near Transit?</div>
+      <div class="subtitle">How Much Housing Could Be Built On Transit-Oriented Surface Parking Lots?</div>
       <div class="byline">By: <a href="https://tomweatherburn.com" target="_blank">Tom Weatherburn</a></div>
       
 
       
       <p>
-        New York City is in the grip of a deepening housing crisis. With rents at record highs—climbing over 30% in some neighborhoods since 2020 (NY Times, 2024)—and a near-record low vacancy rate of just 1.4% (NY Times, 2024), the city is struggling to keep up with demand. Despite adding between 12,000 and 30,000 units annually over the past decade (NYC Comptroller, 2023), this growth lags behind population needs, especially in transit-accessible areas. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots—remnants of outdated zoning laws and a car-first mindset that no longer fits the reality of 21st-century urban life. What if we reimagined these spaces? What if, instead of housing cars, they housed people?
+        New York City is in the grip of a worsening housing crisis.
+        Since 2020, rents in New York City have increased by over 30%, with the median asking rent reaching approximately $3,397 as of early 2025.
+        Manhattan and Brooklyn have seen the sharpest increases, with one-bedroom units in Manhattan now averaging over $4,500 per month.
+        With a vacancy rate hovering at 1.4%, the city remains one of the most expensive and supply-constrained rental markets in the country (Furman Center, 2025).
+        
+        While the city adds between 12,000 and 30,000 new units annually (NYC Comptroller, 2023), that pace lags  behind the needs of a growing population and prices continue to march upward, pushing residents out.
       </p>
-
       <p>
-        In this analysis, we map and quantify the city’s surface parking lots, focusing on those within an 800-meter radius of MTA stations—the areas best suited for new housing. By overlaying land use data from PLUTO and the city’s open data portal with transit accessibility, we estimate the number of potential housing units that could replace these underutilized lots. The total housing stock in NYC was approximately 3,705,000 units in 2023 (NYC Comptroller, 2023), yet demand continues to outpace supply. The results of our analysis are striking: converting even a fraction of these sites could add tens of thousands of homes, potentially filling a significant portion of the city’s housing gap. Would this be a silver bullet for affordability? No—but every additional unit helps ease pressure on the market, and placing new housing near transit aligns with the broader goals of sustainability and livability.
+        At the same time, thousands of surface parking lots lie scattered across the city, often within a short walk of an MTA station. As New York continues to embrace transit-oriented development and higher residential densities, car-centric commuting is becoming increasingly difficult—and physically harder to accommodate. These lots represent an enormous opportunity.  Many of these lots could be repurposed as housing—transforming idle space into homes that better reflect the city’s evolving needs.</p>
+      
+      <p>
+      
+        In this analysis, we map and quantify the city's surface parking lots within 800 meters of subway stations. Using land use data from PLUTO and other datasets from the NYC Open Data portal, we estimate the number of housing units that could be built on these sites, applying historical development densities by borough.
       </p>
-      <p>  
-        The question is no longer whether we should rethink these spaces, but how quickly we can act. Surface parking may have once been a necessary urban fixture, but in a city where land is as precious as gold, the logic no longer holds. Housing near transit lowers carbon emissions, reduces commuting costs, and fosters more walkable, vibrant neighborhoods. Other global cities have already taken bold steps in this direction—NYC risks falling behind. If we are serious about tackling the housing crisis, it’s time to challenge the assumption that parking deserves a premium spot in our urban fabric.
+      <p>
+        Our findings suggest that redeveloping these parking lots could yield tens of thousands of new homes. This won’t solve the crisis on its own—no single intervention can—but every additional unit helps. And building near transit has compounding benefits: lower carbon emissions, shorter commutes, and more vibrant, walkable neighborhoods.
+      </p>
+      <p>
+        The practical question now is how quickly New York can adapt its land use priorities. In a city facing a severe housing shortage and limited developable land, maintaining low-density parking lots in high-demand, transit-rich areas presents a missed opportunity. Other cities have already begun to repurpose these spaces for higher-value uses. If New York is to keep pace, it must evaluate where parking remains essential—and where the land could serve more pressing needs.
       </p>
       <div class="image-container">
         <img src="/splash_img.jpg" alt="Splash Image" />

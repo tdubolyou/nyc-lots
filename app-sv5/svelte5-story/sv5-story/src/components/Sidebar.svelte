@@ -29,8 +29,8 @@
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
-      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par', ],
+      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
@@ -81,11 +81,11 @@
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
-      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      layerOn: ['lots_units', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'heatmap'],
       legend: {
-        title: "Parking Lot Area (m²)",
-        gradient: "parking-gradient",
+        title: "Housing Potential (Units)",
+        gradient: "units-gradient",
         labels: ["0", "250", "500", "750", "1000+"]
       }
     }
@@ -126,7 +126,13 @@
   }
 
   function nextSection() {
-    navigateToSection(currentSectionIndex + 1);
+    // Check if all sections are collapsed
+    const allCollapsed = sections.every(section => section.isCollapsed);
+    if (allCollapsed) {
+      navigateToSection(0); // Open the first section
+    } else {
+      navigateToSection(currentSectionIndex + 1);
+    }
   }
 
   function previousSection() {

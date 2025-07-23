@@ -36,6 +36,9 @@
       legendTitle = legendData.title;
       if (legendData.gradient === "development-gradient") {
         legendGradientStyle = "linear-gradient(to right, rgba(245,245,220,0) 0%, rgba(245,245,220,0) 5%, rgb(222,184,135,0.5) 20%, rgb(210,180,140) 40%, rgb(160,82,45) 60%, rgb(139,69,19) 80%, rgb(101,67,33) 95%, rgb(69,46,23) 100%)";
+      } else if (legendData.gradient === "units-gradient") {
+        // This matches the lots_units heatmap color ramp
+        legendGradientStyle = "linear-gradient(to right, rgba(200,255,200,0) 0%, rgba(180,255,120,0.5) 20%, rgba(100,220,100,0.8) 40%, rgba(44,162,95,1) 60%, rgba(0,109,80,1) 80%, rgba(0,70,60,1) 100%)";
       } else {
         legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
       }
@@ -64,7 +67,7 @@
     }, 5000); // Match the duration of the flyTo
   }
 
-  // Updated flyTo function to handle legend data
+  // Updated flyTo function to handle legend data, now with "gradient-units" for lots_units color scheme
   const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = [], legendData = null) => {
     if (map) {
       // Update legend if provided
@@ -72,6 +75,9 @@
         legendTitle = legendData.title;
         if (legendData.gradient === "development-gradient") {
           legendGradientStyle = "linear-gradient(to right, rgba(245,245,220,0) 0%, rgba(245,245,220,0) 5%, rgb(222,184,135,0.5) 20%, rgb(210,180,140) 40%, rgb(160,82,45) 60%, rgb(139,69,19) 80%, rgb(101,67,33) 95%, rgb(69,46,23) 100%)";
+        } else if (legendData.gradient === "units-gradient") {
+          // This matches the lots_units heatmap color ramp
+          legendGradientStyle = "linear-gradient(to right, rgba(200,255,200,0) 0%, rgba(180,255,120,0.5) 20%, rgba(100,220,100,0.8) 40%, rgba(44,162,95,1) 60%, rgba(0,109,80,1) 80%, rgba(0,70,60,1) 100%)";
         } else {
           legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
         }
@@ -135,16 +141,19 @@
           'type': 'raster',
           'source': 'satellite',
           'paint': {
+            // Satellite imagery fades in only at very high zoom levels.
+            // At zoom 17, the satellite layer is fully transparent (opacity 0).
+            // At zoom 18, the satellite layer is fully opaque (opacity 1).
+            // This ensures satellite imagery is only visible when zoomed in very close.
             'raster-opacity': [
               'interpolate',
               ['linear'],
               ['zoom'],
-              17, 0,
-              18, 1
+              17, 0,   // No satellite at or below zoom 17
+              18, 1    // Fully visible at zoom 18 and above
             ]
           }
         });
-        
         // -----------------------------------------------------
         // 2. Custom Overlay Layers (above the satellite imagery)
         // -----------------------------------------------------
@@ -275,23 +284,23 @@
 
         // lots_pts layer (Points feeding the heatmap)
         map.addSource('lots_pts', { type: 'geojson', data: lots_pts });
-        map.addLayer({
-          'id': 'lots',
-          'type': 'circle',
-          'source': 'lots_pts',
-          'layout': { 'visibility': 'none' },
-          'paint': {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              10, 2,
-              16, 4
-            ],
-            'circle-color': '#B42222',
-            'circle-opacity': 0.8
-          }
-        });
+        // map.addLayer({
+        //   'id': 'lots',
+        //   'type': 'circle',
+        //   'source': 'lots_pts',
+        //   'layout': { 'visibility': 'none' },
+        //   'paint': {
+        //     'circle-radius': [
+        //       'interpolate',
+        //       ['linear'],
+        //       ['zoom'],
+        //       10, 2,
+        //       16, 4
+        //     ],
+        //     'circle-color': '#B42222',
+        //     'circle-opacity': 0.8
+        //   }
+        // });
 
         // Interactive Popup Layer for lots_pts - with much larger clickable area
         map.addLayer({
@@ -397,12 +406,66 @@
               'interpolate',
               ['linear'],
               ['heatmap-density'],
-              0, 'rgba(220,250,250,0)',
-              0.2, 'rgb(229,280,270, 0.5)',
-              0.4, 'rgb(153,216,215)',
-              0.6, 'rgb(102,194,184)',
-              0.8, 'rgb(44,162,165)',
-              1, 'rgb(0,109,130)'
+              0, 'rgba(220,250,250,0)',           // fully transparent
+              0.2, 'rgba(229,230,255, 0.5)',       // semi-transparent (should be rgba for opacity)
+              0.4, 'rgb(153,216,215)',            // opaque
+              0.6, 'rgb(102,194,184)',            // opaque
+              0.8, 'rgb(44,162,165)',             // opaque
+              1, 'rgb(0,109,130)'                 // opaque
+            ],
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 4,
+              9, 10,
+              14, 35,
+              30, 200
+            ],
+            'heatmap-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.8,
+              14, 0.8,
+              14.01, 0
+            ]
+          }
+        });
+
+        // New lots_units heatmap layer with green color ramp
+        map.addLayer({
+          'id': 'lots_units',
+          'type': 'heatmap',
+          'source': 'lots_pts',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'EstUnitsBoro'],
+              0, 0,
+              1000, 1
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 2,
+              9, 5
+            ],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(200,255,200,0)',         // fully transparent
+              0.2, 'rgba(180,255,120,0.5)',     // semi-transparent lime green
+              0.4, 'rgba(100,220,100,0.8)',     // medium green
+              0.6, 'rgba(44,162,95,1)',         // darker green
+              0.8, 'rgba(0,109,80,1)',          // dark blue-green
+              1, 'rgba(0,70,60,1)'              // darkest
             ],
             'heatmap-radius': [
               'interpolate',
