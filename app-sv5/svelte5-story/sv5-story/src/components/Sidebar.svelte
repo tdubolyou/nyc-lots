@@ -201,6 +201,7 @@
     padding: 0.5rem;
     border-radius: 4px;
     transition: background-color 0.2s ease;
+    font-size: 1.5rem;
   }
   
   .section-header:hover {
@@ -213,7 +214,7 @@
   }
   
   header h1 {
-    font-size: 2rem;
+    font-size: 1.4rem;
     font-weight: 900;
     font-style: italic;
   }

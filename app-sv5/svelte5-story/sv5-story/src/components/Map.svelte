@@ -8,6 +8,7 @@
   import NYCsubways from '../data/NYCsubways.json';
   import lots_pts from '../data/lots_pts.json';
   import lots_par from '../data/lots_par.json';
+  import lots_par_popup from '../data/lots_par_popup.json';
   import dev_pts from '../data/dev_pts.json';
   import dev_par from '../data/dev_par.json';
   import mask from '../data/mask.json';
@@ -282,6 +283,19 @@
           }
         });
 
+        // Invisible popup layer for lots_par - covers entire parcel area
+        map.addSource('lots_par_popup', { type: 'geojson', data: lots_par_popup });
+        map.addLayer({
+          'id': 'lots_par_popup',
+          'type': 'fill',
+          'source': 'lots_par_popup',
+          'layout': { 'visibility': 'visible' },
+          'paint': {
+            'fill-color': 'rgba(0,0,0,0)',
+            'fill-opacity': 0
+          }
+        });
+
         // lots_pts layer (Points feeding the heatmap)
         map.addSource('lots_pts', { type: 'geojson', data: lots_pts });
         // map.addLayer({
@@ -302,29 +316,10 @@
         //   }
         // });
 
-        // Interactive Popup Layer for lots_pts - with much larger clickable area
-        map.addLayer({
-          'id': 'lots_pts_popup',
-          'type': 'circle',
-          'source': 'lots_pts',
-          'layout': { 'visibility': 'visible' },
-          'paint': {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              10, 20, // Significantly increased from 15
-              16, 40  // Significantly increased from 30
-            ],
-            'circle-color': 'rgba(0,0,0,0)',
-            'circle-opacity': 0
-          }
-        });
-  
-        map.on('mouseenter', 'lots_pts_popup', () => {
+        map.on('mouseenter', 'lots_par_popup', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
-        map.on('mouseleave', 'lots_pts_popup', () => {
+        map.on('mouseleave', 'lots_par_popup', () => {
           map.getCanvas().style.cursor = '';
         });
         
@@ -337,13 +332,21 @@
         });
         
         // Add a click handler with a larger pixel buffer for easier clicking
+        let currentPopup = null; // Store reference to current popup
+        
         map.on('click', (e) => {
+          // Close any existing popup first
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
+          
           // Use a larger pixel radius (30px) to query features around the click point
           const features = map.queryRenderedFeatures([
             // e.point,
           [e.point.x - 20, e.point.y - 20],
           [e.point.x + 20, e.point.y + 20]
-          ], { layers: ['lots_pts_popup'] });
+          ], { layers: ['lots_par_popup'] });
           
           if (!features.length) return;
           const feature = features[0];
@@ -351,13 +354,12 @@
           const content = `
             <span style="font-size:18px"><strong>${props.Address || 'N/A'}</strong></span><br>
             Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
-            Owner: <strong>${props.OwnerName || 'N/A'}</strong><br>
-            Land Use: <strong>${props.LandUse || 'N/A'}</strong><br>
+            Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
             Area (HA): <strong>${props.Area_HA || 'N/A'}</strong><br>
             <strong>Estimated Unit Potential:</strong>
             <span style="font-family: 'Barlow'; font-weight: 900; color: #FF5A30; font-size:44px; display: block; margin: 15px 0; text-align: center;">${props.EstUnitsBoro ? Math.round(props.EstUnitsBoro) : 'N/A'}</span>
           `;
-          new maplibre.Popup({
+          currentPopup = new maplibre.Popup({
             closeButton: true,
             closeOnClick: true,
             className: 'custom-popup'
@@ -365,6 +367,22 @@
             .setLngLat(feature.geometry.coordinates)
             .setHTML(content)
             .addTo(map);
+        });
+        
+        // Close popup on zoom/scroll
+        map.on('zoom', () => {
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
+        });
+        
+        // Close popup on drag/pan
+        map.on('dragstart', () => {
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
         });
   
         // Append custom CSS for the popup close button
@@ -664,7 +682,7 @@
   
   .coordinates-box {
     position: fixed;
-    top: 20px;
+    top: calc(20px + 80px + 8px); /* 20px (legend top) + 80px (legend height estimate) + 8px (margin) */
     right: 20px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.9);
@@ -679,8 +697,8 @@
 
   .legend {
     position: fixed;
-    top: 30px;
-    right: 30px;
+    top: 20px;
+    right: 20px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 4px;
@@ -688,6 +706,7 @@
     font-size: 12px;
     z-index: 1000;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin-bottom: 8px; /* Add margin to separate from coordinates box */
   }
 
   .legend-gradient {
