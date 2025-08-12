@@ -315,7 +315,7 @@
         //     'circle-opacity': 0.8
         //   }
         // });
-
+  
         map.on('mouseenter', 'lots_par_popup', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
@@ -352,7 +352,7 @@
           const feature = features[0];
           const props = feature.properties;
           const content = `
-            <span style="font-size:18px"><strong>${props.Address || 'N/A'}</strong></span><br>
+            <span style="font-size:18px"><strong>${props.Address__pts || 'N/A'}</strong></span><br>
             Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
             Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
             Area (HA): <strong>${props.Area_HA || 'N/A'}</strong><br>
@@ -364,7 +364,7 @@
             closeOnClick: true,
             className: 'custom-popup'
           })
-            .setLngLat(feature.geometry.coordinates)
+            .setLngLat(e.lngLat)
             .setHTML(content)
             .addTo(map);
         });
@@ -520,6 +520,20 @@
           }
         });
 
+        // Add a thin white outline layer for dev_par polygons
+        map.addLayer({
+          'id': 'dev_par_outline',
+          'type': 'line',
+          'source': 'dev_par',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'line-color': '#ffffff',
+            'line-width': 1.2
+          }
+        });
+
         // Add hover popup for development polygons
         let devPopup = null;
         
@@ -622,6 +636,7 @@
         });
 
         // Ensure borough labels use calculated centroids for correct placement
+        // Ensure borough labels use calculated centroids for correct placement
         map.addSource('borolabel', { type: 'geojson', data: borolabel });
         map.addLayer({
           'id': 'boro-labels',
@@ -654,10 +669,7 @@
           }
         });
   
-        // Also log zoom events for debugging
-        map.on('zoom', () => {
-          console.log('Zoom level:', map.getZoom());
-        });
+
   
         // Add updateLegend function to the map object
         map.updateLegend = updateLegend;

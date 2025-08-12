@@ -23,14 +23,16 @@
     { 
       title: "How many surface lots are there in NYC?", 
       content: [
-        { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of MTA stations that were in both the PLUTO database and the City' parking lot data. Across all 5 boroughs I identified 2,222 parking lots. The breakdown by borough is as shown below."},
+        { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of MTA stations that were in both the PLUTO database and the City' parking lot data. Across all 5 boroughs I identified"},  
+        { type: "text", value: "2,222", style: "highlight-number" },
+        { type: "text", value: "parking lots. The breakdown by borough is as shown below."},
         { type: "chart", component: "BoroChart" },
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par', ],
-      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill'],
+      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
@@ -43,17 +45,38 @@
         { type: "text", value: "There is a big spread.  There are 7 sites over 10 HA, there are tons of smaller lots.  The chart below shows the average size of the lots and the total area of the lots by borough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." },
         { type: "chart", component: "LotScatterChart" }      
       ],
-      coordinates: [-73.9427, 40.6544],
-      zoomLevel: 11.3,
+      coordinates: [-73.9795, 40.6688],
+      zoomLevel: 12.6,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
         labels: ["0", "250", "500", "750", "1000+"]
       }
     },
+    
+    { 
+      title: "Here's a close up", 
+      content: [
+        { type: "text", value: "Some small lots are located very close to transit stations and other residential land.  There are many areas in teh city where small lots are clustered together, and areas were large lots are ore industrial. Click parcels for details." },
+             
+      ],
+      coordinates: [-73.9934, 40.7271],
+      zoomLevel: 18.90,
+      isCollapsed: true,
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
+      legend: {
+        title: "Parking Lot Area (m²)",
+        gradient: "parking-gradient",
+        labels: ["0", "250", "500", "750", "1000+"]
+      }
+    },
+    
+    
+    
     { 
       title: "What typically gets built in each borough?", 
       content: [
@@ -63,7 +86,7 @@
       coordinates: [-73.9938, 40.7512],
       zoomLevel: 13.32, 
       isCollapsed: true,
-      layerOn: ['dev_pts_heatmap', 'dev_par_fill'],
+      layerOn: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
       layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
       legend: {
         title: "Recent Development Density (units/ha)",
@@ -82,7 +105,7 @@
       zoomLevel: 9.9,
       isCollapsed: true,
       layerOn: ['lots_units', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'heatmap'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'heatmap'],
       legend: {
         title: "Housing Potential (Units)",
         gradient: "units-gradient",
@@ -123,6 +146,20 @@
       sections[index].layerOff || [],
       sections[index].legend
     );
+
+    // Scroll to the section
+    setTimeout(() => {
+      const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
+      const sidebarContent = document.querySelector('.sidebar-content');
+      if (sectionElement && sidebarContent) {
+        const sectionTop = sectionElement.offsetTop;
+        
+        sidebarContent.scrollTo({
+          top: sectionTop,
+          behavior: 'smooth'
+        });
+      }
+    }, 150);
   }
 
   function nextSection() {
@@ -153,6 +190,21 @@
             section.layerOff || [],
             section.legend
           );
+          
+          // Scroll the clicked section header to the top of the sidebar
+          setTimeout(() => {
+            const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
+            const sidebarContent = document.querySelector('.sidebar-content');
+            if (sectionElement && sidebarContent) {
+              // Get the section's position relative to the sidebar content
+              const sectionTop = sectionElement.offsetTop;
+              
+              sidebarContent.scrollTo({
+                top: sectionTop,
+                behavior: 'smooth'
+              });
+            }
+          }, 150); // Slightly longer delay to ensure section expansion is complete
         }
       } else {
         section.isCollapsed = true;
@@ -202,6 +254,16 @@
     border-radius: 4px;
     transition: background-color 0.2s ease;
     font-size: 1.5rem;
+    background: #ffffff;
+  }
+
+  .section-header.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .section-header:hover {
@@ -313,8 +375,24 @@
 
     .open-button {
       top: auto;
-      bottom: 20px;
+      bottom: 80px;
       left: 20px;
+    }
+
+    .bottom-nav-controls {
+      bottom: 15px;
+      right: 15px;
+      gap: 12px;
+    }
+
+    .bottom-nav-button {
+      width: 36px;
+      height: 36px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
     }
 
     header h1 {
@@ -346,47 +424,77 @@
     }
   }
   
-  .navigation-buttons {
+  /* Bottom Right Navigation Controls */
+  .bottom-nav-controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
     display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    border-bottom: 1px solid #e5e5e5;
-    border-top: 1px solid #e5e5e5;
-    background: #ffffff;
-    position: sticky;
-    bottom: 0;
-    margin-top: auto;
-    
+    align-items: center;
+    gap: 16px;
+    z-index: 1001;
   }
 
-  .nav-button {
-    background: #888382FF;
-    color: white;
+  .bottom-nav-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .bottom-nav-button {
+    background: #FF4500;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: background-color 0.2s ease;
-    flex: 1;
-    margin: 0 0.5rem;
   }
 
-  .nav-button:first-child {
-    margin-left: 0;
+  .bottom-nav-button:hover {
+    background: #e54020;
   }
 
-  .nav-button:last-child {
-    margin-right: 0;
+  .bottom-nav-button:active {
+    background: #d63910;
   }
 
-  .nav-button:hover {
-    background: #e54a20;
-  }
-
-  .nav-button:disabled {
+  .bottom-nav-button:disabled {
     background: #ccc;
     cursor: not-allowed;
+  }
+
+  .progress-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .progress-dot.active {
+    background: #FF4500;
+  }
+
+  .progress-dot:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .progress-dot.active:hover {
+    background: #e54020;
   }
   
   .introduction {
@@ -432,10 +540,12 @@
       </p>
     </header>
 
+
+
     <!-- Render each section -->
     {#each sections as section, index}
-      <div class="section">
-        <h3 class="section-header" on:click={() => toggleCollapse(index)} aria-expanded={!section.isCollapsed}>
+      <div class="section" data-section-index={index}>
+        <h3 class="section-header {!section.isCollapsed ? 'sticky' : ''}" on:click={() => toggleCollapse(index)} aria-expanded={!section.isCollapsed}>
           <span>{section.title}</span>
           <span class="chevron-icon">
             {#if section.isCollapsed}
@@ -467,19 +577,37 @@
       </div>
     {/each}
   </div>
-  
-  <!-- Navigation Buttons -->
-  <div class="navigation-buttons">
-    <button class="nav-button" on:click={previousSection} aria-label="Previous section">
-      ← Previous
-    </button>
-    <button class="nav-button" on:click={nextSection} aria-label="Next section">
-      Next →
-    </button>
-  </div>
 </div>
 
 <!-- Open Sidebar Button (Visible when Sidebar is hidden) -->
 {#if !sidebarVisible}
   <button class="open-button" on:click={openSidebar} aria-label="Open sidebar">i</button>
 {/if}
+
+<!-- Bottom Right Navigation Controls -->
+<div class="bottom-nav-controls">
+  <!-- Navigation Buttons -->
+  <div class="bottom-nav-buttons">
+    <button class="bottom-nav-button" on:click={previousSection} aria-label="Previous section">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 12L6 8L10 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="bottom-nav-button" on:click={nextSection} aria-label="Next section">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 4L10 8L6 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Progress Indicator -->
+  <div class="progress-indicator">
+    {#each sections as section, index}
+      <button 
+        class="progress-dot {index === currentSectionIndex && !sections[index].isCollapsed ? 'active' : ''}"
+        on:click={() => navigateToSection(index)}
+        aria-label="Go to section {index + 1}"
+      ></button>
+    {/each}
+  </div>
+</div>
