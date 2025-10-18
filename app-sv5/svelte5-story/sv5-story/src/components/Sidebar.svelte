@@ -25,14 +25,15 @@
       content: [
         { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of MTA stations that were in both the PLUTO database and the City' parking lot data. Across all 5 boroughs I identified"},  
         { type: "text", value: "2,222", style: "highlight-number" },
+        { type: "text", value: "parking lots", style: "highlight-subtitle" },
         { type: "text", value: "parking lots. The breakdown by borough is as shown below."},
         { type: "chart", component: "BoroChart" },
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
-      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par', ],
-      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
+      layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
@@ -49,7 +50,7 @@
       zoomLevel: 12.6,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
@@ -67,7 +68,7 @@
       zoomLevel: 18.90,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
       legend: {
         title: "Parking Lot Area (m²)",
         gradient: "parking-gradient",
@@ -87,7 +88,7 @@
       zoomLevel: 13.32, 
       isCollapsed: true,
       layerOn: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline'],
-      layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
+      layerOff: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par', 'boro-labels', 'boro-unit-labels'],
       legend: {
         title: "Recent Development Density (units/ha)",
         gradient: "development-gradient",
@@ -104,11 +105,11 @@
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
-      layerOn: ['lots_units', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'heatmap'],
+      layerOn: ['lots_units_faded', 'lots_par_fill', 'lots_par_outline', 'lots_par', 'boro-unit-labels'],
+      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'heatmap', 'lots_units', 'boro-labels'],
       legend: {
         title: "Housing Potential (Units)",
-        gradient: "units-gradient",
+        gradient: "units-faded-gradient",
         labels: ["0", "250", "500", "750", "1000+"]
       }
     }
@@ -519,7 +520,18 @@
     font-weight: bold;
     color: #008080; /* Teal color */
     text-align: center;
-    margin: 1rem 0;
+    margin: 1rem 0 0rem 0;
+    padding: 0.5rem;
+  }
+  
+  /* Style for highlight subtitles */
+  .section p.highlight-subtitle {
+    font-family: 'Barlow', sans-serif;
+    font-size: 44px;
+    font-weight: bold;
+    color: #008080; /* Teal color */
+    text-align: center;
+    margin: -0.1rem 0 1rem 0;
     padding: 0.5rem;
   }
 </style>

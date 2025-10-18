@@ -1,6 +1,7 @@
 <script>
   export let onClose; // Function to close or hide the splash
   import { onMount } from 'svelte';
+  import { base } from '$app/paths';
   let scrolled = false;
   let overlayEl;
 
@@ -190,7 +191,7 @@
         While the city adds between 12,000 and 30,000 new units annually (NYC Comptroller, 2023), that pace lags  behind the needs of a growing population and prices continue to march upward, pushing residents out.
       </p>
       <div class="image-container">
-        <img src="/splash_img.jpg" alt="Splash Image" />
+        <img src="{base}/splash_img.jpg" alt="Splash Image" />
         <button class="enter-button" on:click={onClose}>ENTER MAP</button>
       </div>
       

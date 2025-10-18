@@ -3,10 +3,10 @@
 "name": "boro_pt",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "borocode": "3", "boroname": "Brooklyn", "shape_area": "1934142842.48", "shape_leng": "728150.705111" }, "geometry": { "type": "Point", "coordinates": [ -73.947848045102859, 40.644762760380011 ] } },
-{ "type": "Feature", "properties": { "borocode": "5", "boroname": "Staten Island", "shape_area": "1623618684.31", "shape_leng": "325910.306061" }, "geometry": { "type": "Point", "coordinates": [ -74.153374024209242, 40.580844394310844 ] } },
-{ "type": "Feature", "properties": { "borocode": "1", "boroname": "Manhattan", "shape_area": "636645571.613", "shape_leng": "360056.730857" }, "geometry": { "type": "Point", "coordinates": [ -73.967169673653217, 40.777265465203094 ] } },
-{ "type": "Feature", "properties": { "borocode": "2", "boroname": "Bronx", "shape_area": "1187174772.32", "shape_leng": "463180.578878" }, "geometry": { "type": "Point", "coordinates": [ -73.866505858905583, 40.852642712618099 ] } },
-{ "type": "Feature", "properties": { "borocode": "4", "boroname": "Queens", "shape_area": "3041418003.6", "shape_leng": "888197.010944" }, "geometry": { "type": "Point", "coordinates": [ -73.818556408862094, 40.707657583890303 ] } }
+{ "type": "Feature", "properties": { "borocode": "3", "boroname": "Brooklyn", "shape_area": "1934142842.48", "shape_leng": "728150.705111", "est_units_total": 22007.3, "lot_count": 786 }, "geometry": { "type": "Point", "coordinates": [ -73.947848045102859, 40.644762760380011 ] } },
+{ "type": "Feature", "properties": { "borocode": "5", "boroname": "Staten Island", "shape_area": "1623618684.31", "shape_leng": "325910.306061", "est_units_total": 439.9, "lot_count": 108 }, "geometry": { "type": "Point", "coordinates": [ -74.153374024209242, 40.580844394310844 ] } },
+{ "type": "Feature", "properties": { "borocode": "1", "boroname": "Manhattan", "shape_area": "636645571.613", "shape_leng": "360056.730857", "est_units_total": 16354.7, "lot_count": 301 }, "geometry": { "type": "Point", "coordinates": [ -73.967169673653217, 40.777265465203094 ] } },
+{ "type": "Feature", "properties": { "borocode": "2", "boroname": "Bronx", "shape_area": "1187174772.32", "shape_leng": "463180.578878", "est_units_total": 13205.1, "lot_count": 557 }, "geometry": { "type": "Point", "coordinates": [ -73.866505858905583, 40.852642712618099 ] } },
+{ "type": "Feature", "properties": { "borocode": "4", "boroname": "Queens", "shape_area": "3041418003.6", "shape_leng": "888197.010944", "est_units_total": 10520.9, "lot_count": 470 }, "geometry": { "type": "Point", "coordinates": [ -73.818556408862094, 40.707657583890303 ] } }
 ]
 }

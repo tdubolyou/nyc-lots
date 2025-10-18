@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import maplibre from 'maplibre-gl';
+  import { base } from '$app/paths';
   // import 'maplibre-gl/dist/maplibre-gl.css'; // Import default MapLibre GL CSS if needed
 
   import stations from '../data/stations.json';
@@ -40,6 +41,9 @@
       } else if (legendData.gradient === "units-gradient") {
         // This matches the lots_units heatmap color ramp
         legendGradientStyle = "linear-gradient(to right, rgba(200,255,200,0) 0%, rgba(180,255,120,0.5) 20%, rgba(100,220,100,0.8) 40%, rgba(44,162,95,1) 60%, rgba(0,109,80,1) 80%, rgba(0,70,60,1) 100%)";
+      } else if (legendData.gradient === "units-faded-gradient") {
+        // This matches the lots_units_faded heatmap color ramp
+        legendGradientStyle = "linear-gradient(to right, rgba(240,240,240,0) 0%, rgba(220,220,220,0.3) 20%, rgba(200,200,200,0.5) 40%, rgba(180,180,180,0.7) 60%, rgba(160,160,160,0.8) 80%, rgba(140,140,140,0.9) 100%)";
       } else {
         legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
       }
@@ -79,6 +83,9 @@
         } else if (legendData.gradient === "units-gradient") {
           // This matches the lots_units heatmap color ramp
           legendGradientStyle = "linear-gradient(to right, rgba(200,255,200,0) 0%, rgba(180,255,120,0.5) 20%, rgba(100,220,100,0.8) 40%, rgba(44,162,95,1) 60%, rgba(0,109,80,1) 80%, rgba(0,70,60,1) 100%)";
+        } else if (legendData.gradient === "units-faded-gradient") {
+          // This matches the lots_units_faded heatmap color ramp
+          legendGradientStyle = "linear-gradient(to right, rgba(240,240,240,0) 0%, rgba(220,220,220,0.3) 20%, rgba(200,200,200,0.5) 40%, rgba(180,180,180,0.7) 60%, rgba(160,160,160,0.8) 80%, rgba(140,140,140,0.9) 100%)";
         } else {
           legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
         }
@@ -104,7 +111,7 @@
     map = new maplibre.Map({
       container: 'map',
       attributionControl: false,
-      style: '/mapTO-light.json',
+      style: `${base}/mapTO-light.json`,
       center: [-73.9748, 40.6935], // Starting position for the animation
       zoom: 8.7, // Starting zoom level
       // maxBounds: [
@@ -425,7 +432,7 @@
               ['linear'],
               ['heatmap-density'],
               0, 'rgba(220,250,250,0)',           // fully transparent
-              0.2, 'rgba(229,230,255, 0.5)',       // semi-transparent (should be rgba for opacity)
+              0.2, 'rgba(229,230,255, 0.5)',       // semi-transparent
               0.4, 'rgb(153,216,215)',            // opaque
               0.6, 'rgb(102,194,184)',            // opaque
               0.8, 'rgb(44,162,165)',             // opaque
@@ -500,6 +507,60 @@
               ['zoom'],
               0, 0.8,
               14, 0.8,
+              14.01, 0
+            ]
+          }
+        });
+
+        // Light grey version of lots_units heatmap for housing potential section
+        map.addLayer({
+          'id': 'lots_units_faded',
+          'type': 'heatmap',
+          'source': 'lots_pts',
+          'layout': {
+            'visibility': 'none'
+          },
+          'paint': {
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'EstUnitsBoro'],
+              0, 0,
+              1000, 1
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 2,
+              9, 5
+            ],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(240,240,240,0)',         // fully transparent light grey
+              0.2, 'rgba(220,220,220,0.3)',     // semi-transparent light grey
+              0.4, 'rgba(200,200,200,0.5)',     // medium light grey
+              0.6, 'rgba(180,180,180,0.7)',     // darker light grey
+              0.8, 'rgba(160,160,160,0.8)',     // darker grey
+              1, 'rgba(140,140,140,0.9)'        // darkest grey
+            ],
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 4,
+              9, 10,
+              14, 35,
+              20, 200
+            ],
+            'heatmap-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.6,
+              14, 0.6,
               14.01, 0
             ]
           }
@@ -658,7 +719,49 @@
             'text-halo-width': 2.5 // Slightly increased for better readability
           }
         });
-  
+
+        // Add borough unit totals labels layer
+        map.addLayer({
+          'id': 'boro-unit-labels',
+          'type': 'symbol',
+          'source': 'borolabel',
+          'layout': {
+            'text-field': [
+              'format',
+              ['get', 'boroname'],
+              { 'font-scale': 0.9 },
+              '\n',
+              {},
+              ['number-format', ['round', ['get', 'est_units_total']], { 'min-fraction-digits': 0, 'max-fraction-digits': 0 }],
+              { 'font-scale': 1.4 },
+              '\n',
+              {},
+              ['concat', ['number-format', ['*', ['/', ['get', 'est_units_total'], 62528], 100], { 'min-fraction-digits': 1, 'max-fraction-digits': 1 }], '%'],
+              { 'font-scale': 0.8 }
+            ],
+            'text-size': 20,
+            'text-anchor': 'center',
+            'text-font': ['Barlow Bold'],
+            'symbol-placement': 'point',
+            'text-allow-overlap': true,
+            'text-ignore-placement': false,
+            'visibility': 'none' // Hidden by default
+          },
+          'paint': {
+            'text-color': [
+              'case',
+              ['==', ['get', 'boroname'], 'Brooklyn'], '#008080',
+              ['==', ['get', 'boroname'], 'Manhattan'], '#008080', 
+              ['==', ['get', 'boroname'], 'Bronx'], '#008080',
+              ['==', ['get', 'boroname'], 'Queens'], '#008080',
+              ['==', ['get', 'boroname'], 'Staten Island'], '#008080',
+              '#000000'
+            ],
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 3
+          }
+        });
+
         // Use map idle event to display the map container and start animation
         map.on('idle', () => {
           if (!mapShown) {
