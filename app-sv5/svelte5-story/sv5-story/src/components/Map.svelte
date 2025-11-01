@@ -145,7 +145,7 @@
         map.addSource('satellite', {
           type: 'raster',
           tiles: [
-            'https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
+            'https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=rGKSrBEhmKFMvUL5I5NH'
           ],
           tileSize: 256
         });
