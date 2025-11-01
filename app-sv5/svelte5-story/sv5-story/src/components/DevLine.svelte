@@ -143,7 +143,7 @@
       svgElement.append('path')
         .datum(borough.values) // Bind the time series data
         .attr('fill', 'none')
-        .attr('stroke', '#008080') // Consistent color for all boroughs
+        .attr('stroke', '#974312') // Consistent color for all boroughs (matches dev heatmap)
         .attr('stroke-width', 2.5)
         .attr('opacity', 0.8)
         .attr('d', line); // Use line generator to create path
@@ -163,7 +163,7 @@
         .attr('cx', d => x(d.year))
         .attr('cy', d => y(d.avg_units_ha))
         .attr('r', 3)
-        .attr('fill', '#008080')
+        .attr('fill', '#974312')
         .attr('opacity', 0.8);
 
       // Add value labels (hidden by default, shown on hover)
@@ -220,7 +220,7 @@
           .attr('y1', baseY)
           .attr('x2', x(lastPoint.year) + 10) // Short horizontal line
           .attr('y2', labelY)
-          .attr('stroke', '#008080')
+          .attr('stroke', '#974312')
           .attr('stroke-width', 1)
           .attr('opacity', 0.8);
       }

@@ -52,7 +52,7 @@
       title: "How big are they?", 
       content: [
         { type: "chart", component: "LotScatterChart" },      
-      { type: "text", value: "There is a big spread.  There are 7 sites over 10 HA, there are tons of smaller lots.  The chart below shows the average size of the lots and the total area of the lots by borough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." }
+      { type: "text", value: "The total land area is just over 150 Hectares.  This is equivalent to about half of central park or more than 13 Hudson Yards.  The size of parking lots varies significantly across Burroughs.   While Brooklyn has the smallest average lot size, with nearly 800, it has the highest overall lot area.  Staten Island has far fewer lots but very large sites." }
           
       ],
       coordinates: [-73.9795, 40.6688],
@@ -70,7 +70,7 @@
     { 
       title: "Lots of small parcels close together", 
       content: [
-        { type: "text", value: "Some small lots are located very close to transit stations and other residential land.  There are many areas in teh city where small lots are clustered together, and areas were large lots are ore industrial. Click parcels for details." },
+        { type: "text", value: "Im not sure what to say here yet, I just wanted to zoom in on something. There are many areas in the city where small lots are clustered together, and areas were large lots are industrial. Click parcels for details." },
              
       ],
       coordinates: [-73.9934, 40.7271],
@@ -90,7 +90,7 @@
     { 
       title: "What typically gets built in each borough?", 
       content: [
-        { type: "text", value: "I looked at development within the same catchment that was built within the last 10 years, according to PLUTO. Clearly the highest density borough is Manhattan. Despite lower densities in 2017-19,the average desity has been increasong slightly and sits in the mid 70s (units/ha). Staten Island has the lowest average density and it has been arouns 4.5 units/ha over the 10 year period. While recent development in the bronx has been lower density, there is an overall increasing trend. The average over 10 years is 31 units/ha.  In Brooklyn densities have increased significantly in recent years, up to 60 units/ha in 2023. the average over the 10 year period is 41." },
+        { type: "text", value: "Historical development data shows how dense development projects tend to be in each ward, over the last 10 years.  Not surprisingly, Manhattan has the highest densitieswhile the other burroughs vary quite a bit.  Looking at trends lines shows all Burroughs are trending up.  From this data I calculated average densities estimaet housing potential on parking lots." },
         { type: "chart", component: "DevLine" }  
       ],
       coordinates: [-73.9938, 40.7512],
@@ -107,9 +107,9 @@
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "Applying historic density tot he area of the parking lots, gives a sense of the housing potential of these surface lots. Doign so yielded a total of:" },
+        { type: "text", value: "Applying historic density to the area of the parking lots, gives a sense of the housing potential of these surface lots. Doing so yielded a total of: 62,820 units." },
         { type: "text", value: "62,820", style: "highlight-number" },
-        { type: "text", value: "Given new untis have ranged from 12K to 30k in recent years, this represents between 2 and 5 years of new supply. If one were to apply the average densityof the last 3 years, we would see significantly increased yields, up to ~100k units." }
+        { type: "text", value: "Given new untis have ranged from 12K to 30k in recent years, this represents between 2 and 5 years of new supply. If one were to apply the average density of the last 3 years, we would see significantly increased yields, up to ~100k units." }
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
