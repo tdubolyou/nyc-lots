@@ -1,5 +1,6 @@
 <script>
   import { slide } from 'svelte/transition';
+  import { tick } from 'svelte';
   import BoroChart from './BoroChart.svelte';
   import LotSizeChart from './LotSize.svelte';
   import LotScatterChart from './LotScatter.svelte';
@@ -8,6 +9,11 @@
   export let flyTo; // Function passed in from the parent component to handle map flyTo
 
   let sidebarVisible = true;
+
+  let sidebarContentRef;
+  let mainHeaderRef;
+  let sectionHeaderRefs = [];
+  let scrollPosition = 0;
 
   // Map block component names to Svelte components.
   const componentMap = {
@@ -23,43 +29,46 @@
     { 
       title: "How many surface lots are there in NYC?", 
       content: [
-        { type: "text", value: "There are a lot. I narrowed it down to lots within 800m of MTA stations that were in both the PLUTO database and the City' parking lot data. Across all 5 boroughs I identified"},  
         { type: "text", value: "2,222", style: "highlight-number" },
-        { type: "text", value: "parking lots", style: "highlight-subtitle" },
-        { type: "text", value: "parking lots. The breakdown by borough is as shown below."},
+        { type: "text", value: "Parking Lots", style: "highlight-subtitle" },
+        
+        { type: "text", value: "There are 2,222 parcels surface parking lots within 800 metres of an MTA station across the city.  Brooklyn has the highest number of lots with 786. Staten Island has the least at 108."},  
+        
+ 
         { type: "chart", component: "BoroChart" },
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
+      layerOff: ['lots_units', 'dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels', 'lots_units_faded'],
       legend: {
-        title: "Parking Lot Area (m²)",
+        title: "Parking Lot Area (hectares)",
         gradient: "parking-gradient",
-        labels: ["0", "250", "500", "750", "1000+"]
+        labels: ["0", "0.4", "0.8", "1.2", "1.6+"]
       }
     },
     { 
       title: "How big are they?", 
       content: [
-        { type: "text", value: "There is a big spread.  There are 7 sites over 10 HA, there are tons of smaller lots.  The chart below shows the average size of the lots and the total area of the lots by borough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." },
-        { type: "chart", component: "LotScatterChart" }      
+        { type: "chart", component: "LotScatterChart" },      
+      { type: "text", value: "There is a big spread.  There are 7 sites over 10 HA, there are tons of smaller lots.  The chart below shows the average size of the lots and the total area of the lots by borough.  We can see that Brooklyn has the largest area as well as a relatively small average size, pointing to many smaller lots while Quees has a much alarger share of large lots." }
+          
       ],
       coordinates: [-73.9795, 40.6688],
       zoomLevel: 12.6,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
-      layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
+      layerOff: ['lots_units_faded','dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
       legend: {
-        title: "Parking Lot Area (m²)",
+        title: "Parking Lot Area (hectares)",
         gradient: "parking-gradient",
-        labels: ["0", "250", "500", "750", "1000+"]
+        labels: ["0", "0.4", "0.8", "1.2", "1.6+"]
       }
     },
     
     { 
-      title: "Here's a close up", 
+      title: "Lots of small parcels close together", 
       content: [
         { type: "text", value: "Some small lots are located very close to transit stations and other residential land.  There are many areas in teh city where small lots are clustered together, and areas were large lots are ore industrial. Click parcels for details." },
              
@@ -70,9 +79,9 @@
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
       layerOff: ['dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
       legend: {
-        title: "Parking Lot Area (m²)",
+        title: "Parking Lot Area (hectares)",
         gradient: "parking-gradient",
-        labels: ["0", "250", "500", "750", "1000+"]
+        labels: ["0", "0.4", "0.8", "1.2", "1.6+"]
       }
     },
     
@@ -99,7 +108,7 @@
       title: "Whats the housing potential of these lots?", 
       content: [
         { type: "text", value: "Applying historic density tot he area of the parking lots, gives a sense of the housing potential of these surface lots. Doign so yielded a total of:" },
-        { type: "text", value: "62,528", style: "highlight-number" },
+        { type: "text", value: "62,820", style: "highlight-number" },
         { type: "text", value: "Given new untis have ranged from 12K to 30k in recent years, this represents between 2 and 5 years of new supply. If one were to apply the average densityof the last 3 years, we would see significantly increased yields, up to ~100k units." }
       ],
       coordinates: [-74.1009, 40.7000],
@@ -110,7 +119,7 @@
       legend: {
         title: "Housing Potential (Units)",
         gradient: "units-faded-gradient",
-        labels: ["0", "250", "500", "750", "1000+"]
+        labels: ["0", "0.4", "0.8", "1.2", "1.6+"]
       }
     }
   ];
@@ -124,43 +133,33 @@
   function openSidebar() {
     sidebarVisible = true;
   }
+
+  function handleScroll(event) {
+    scrollPosition = event.target.scrollTop;
+  }
   
   function navigateToSection(index) {
     // Ensure index is within bounds
     if (index < 0) index = sections.length - 1;
     if (index >= sections.length) index = 0;
     
-    // Close all sections first
-    sections = sections.map(section => ({ ...section, isCollapsed: true }));
-    
-    // Open the target section
-    sections[index].isCollapsed = false;
-    
-    // Update current index
+    sections = sections.map((section, i) => ({
+      ...section,
+      isCollapsed: i === index ? false : true
+    }));
+
     currentSectionIndex = index;
-    
-    // Trigger the flyTo for the section
+
+    const targetSection = sections[index];
     flyTo(
-      sections[index].coordinates,
-      sections[index].zoomLevel,
-      sections[index].layerOn || [],
-      sections[index].layerOff || [],
-      sections[index].legend
+      targetSection.coordinates,
+      targetSection.zoomLevel,
+      targetSection.layerOn || [],
+      targetSection.layerOff || [],
+      targetSection.legend
     );
 
-    // Scroll to the section
-    setTimeout(() => {
-      const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
-      const sidebarContent = document.querySelector('.sidebar-content');
-      if (sectionElement && sidebarContent) {
-        const sectionTop = sectionElement.offsetTop;
-        
-        sidebarContent.scrollTo({
-          top: sectionTop,
-          behavior: 'smooth'
-        });
-      }
-    }, 150);
+    scrollToSection(index);
   }
 
   function nextSection() {
@@ -179,39 +178,59 @@
 
   // Update toggleCollapse to maintain currentSectionIndex
   function toggleCollapse(index) {
-    sections = sections.map((section, i) => {
-      if (i === index) {
-        section.isCollapsed = !section.isCollapsed;
-        if (!section.isCollapsed) {
-          currentSectionIndex = index;
-          flyTo(
-            section.coordinates,
-            section.zoomLevel,
-            section.layerOn || [],
-            section.layerOff || [],
-            section.legend
-          );
-          
-          // Scroll the clicked section header to the top of the sidebar
-          setTimeout(() => {
-            const sectionElement = document.querySelector(`[data-section-index="${index}"]`);
-            const sidebarContent = document.querySelector('.sidebar-content');
-            if (sectionElement && sidebarContent) {
-              // Get the section's position relative to the sidebar content
-              const sectionTop = sectionElement.offsetTop;
-              
-              sidebarContent.scrollTo({
-                top: sectionTop,
-                behavior: 'smooth'
-              });
-            }
-          }, 150); // Slightly longer delay to ensure section expansion is complete
+    // Close all sections and open the clicked one
+    sections = sections.map((section, i) => ({
+      ...section,
+      isCollapsed: i !== index
+    }));
+
+    // Always update currentSectionIndex when a section is clicked
+    currentSectionIndex = index;
+
+    // Always trigger flyTo and scroll when a section is clicked
+    const targetSection = sections[index];
+    flyTo(
+      targetSection.coordinates,
+      targetSection.zoomLevel,
+      targetSection.layerOn || [],
+      targetSection.layerOff || [],
+      targetSection.legend
+    );
+
+    scrollToSection(index);
+  }
+
+  // Simple scroll function - put the section header at the top of the viewport (below main header)
+  function scrollToSection(index) {
+    // Wait for the slide transition to fully complete before measuring positions
+    setTimeout(() => {
+      if (sidebarContentRef && sectionHeaderRefs[index]) {
+        // Find the section header's absolute position in the scrollable content
+        let sectionTop = 0;
+        let el = sectionHeaderRefs[index];
+        while (el && el !== sidebarContentRef) {
+          sectionTop += el.offsetTop;
+          el = el.offsetParent;
         }
-      } else {
-        section.isCollapsed = true;
+        
+        // The ideal scroll position is just the section's position
+        // Add a buffer to ensure the header isn't cut off
+        const idealScroll = sectionTop - 10;
+        
+        // Get the maximum possible scroll (total scrollable height minus visible height)
+        const maxScroll = sidebarContentRef.scrollHeight - sidebarContentRef.clientHeight;
+        
+        // Use the smaller of idealScroll or maxScroll to handle small content
+        const targetScroll = Math.min(Math.max(0, idealScroll), maxScroll);
+        
+        console.log('Section:', index, 'SectionTop:', sectionTop, 'IdealScroll:', idealScroll, 'MaxScroll:', maxScroll, 'TargetScroll:', targetScroll, 'Current scrollTop:', sidebarContentRef.scrollTop);
+        
+        sidebarContentRef.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        });
       }
-      return section;
-    });
+    }, 520); // Wait for slide transition (500ms) + buffer for accurate measurements
   }
 </script>
 
@@ -237,6 +256,8 @@
     overflow-y: auto;
     flex-grow: 1;
     padding-bottom: 0;
+    scroll-behavior: smooth;
+    scroll-padding-top: 0;
   }
   
   .sidebar-hidden {
@@ -245,17 +266,39 @@
   
   .section-header {
     color: #000;
-    cursor: pointer;
     font-weight: 900;
     margin: 0.5rem 0;
+    transition: background-color 0.2s ease;
+    font-size: 1.4rem;
+    background: #ffffff;
+  }
+
+  .section-header-button {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
     padding: 0.5rem;
     border-radius: 4px;
-    transition: background-color 0.2s ease;
-    font-size: 1.5rem;
-    background: #ffffff;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .section-header-button:hover {
+    background-color: #f8f9fa;
+  }
+
+  .section-header-button:active {
+    background-color: #e9ecef;
+  }
+
+  .section-header-button:focus-visible {
+    outline: 2px solid #008080;
+    outline-offset: 2px;
   }
 
   .section-header.sticky {
@@ -264,11 +307,21 @@
     z-index: 10;
     margin: 0;
     border-radius: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
-  .section-header:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+
+  .section-header.sticky .section-header-button {
+    border-radius: 0;
+  }
+
+  .section.collapsed .section-header-button {
+    font-weight: 600;
+    color: #666;
+    opacity: 0.9;
+  }
+
+  .section.collapsed .section-header-button:hover {
+    color: #333;
+    font-weight: 700;
   }
   
   header h1, header h2, header p {
@@ -277,14 +330,14 @@
   }
   
   header h1 {
-    font-size: 1.4rem;
+    font-size: 2rem;
     font-weight: 900;
     font-style: italic;
   }
   
   header h2 {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     margin-bottom: 0.5rem;
   }
   
@@ -381,9 +434,8 @@
     }
 
     .bottom-nav-controls {
-      bottom: 15px;
-      right: 15px;
-      gap: 12px;
+      padding: 0.5rem;
+      gap: 6px;
     }
 
     .bottom-nav-button {
@@ -425,15 +477,20 @@
     }
   }
   
-  /* Bottom Right Navigation Controls */
+  /* Bottom Navigation Controls */
   .bottom-nav-controls {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+    position: sticky;
+    bottom: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 16px;
-    z-index: 1001;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.75rem;
+    background: #ffffff;
+    border-top: 1px solid #e5e5e5;
+    margin-top: auto;
+    z-index: 10;
   }
 
   .bottom-nav-buttons {
@@ -471,9 +528,10 @@
 
   .progress-indicator {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
     align-items: center;
+    justify-content: center;
   }
 
   .progress-dot {
@@ -481,7 +539,7 @@
     height: 10px;
     border-radius: 50%;
     border: none;
-    background: rgba(255, 255, 255, 0.7);
+    background: #d3d3d3;
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
@@ -491,11 +549,25 @@
   }
 
   .progress-dot:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: #b0b0b0;
   }
 
   .progress-dot.active:hover {
     background: #e54020;
+  }
+
+  .scroll-indicator {
+    position: fixed;
+    bottom: 100px;
+    left: 520px;
+    background: rgba(0, 128, 128, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   
   .introduction {
@@ -521,7 +593,7 @@
     color: #008080; /* Teal color */
     text-align: center;
     margin: 1rem 0 0rem 0;
-    padding: 0.5rem;
+    line-height: 1;
   }
   
   /* Style for highlight subtitles */
@@ -531,8 +603,8 @@
     font-weight: bold;
     color: #008080; /* Teal color */
     text-align: center;
-    margin: -0.1rem 0 1rem 0;
-    padding: 0.5rem;
+    /* margin: -0.1rem 0 1rem 0; */
+    /* padding: 0.5rem; */
   }
 </style>
 
@@ -541,40 +613,51 @@
   <!-- Collapse Button -->
   <button class="collapse-button" on:click={closeSidebar} aria-label="Close sidebar">×</button>
   
-  <div class="sidebar-content">
+  <div class="sidebar-content" bind:this={sidebarContentRef} on:scroll={handleScroll}>
     <!-- Header Section -->
-    <header>
-      <h1>How much housing could be built on the parking lots of NYC?</h1>
+    <header bind:this={mainHeaderRef}>
+      <h1>How Much Housning Could be Built on the Parking Lots of NYC?</h1>
       <h2>A lot, actually</h2>
       <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
-      <p class="introduction">
+      <!-- <p class="introduction">
         This analysis explores the potential for housing development on surface parking lots near transit stations across New York City. By examining lot sizes, locations, and development patterns, we can estimate how many new housing units could be created in these underutilized spaces.
-      </p>
+      </p> -->
     </header>
 
 
 
     <!-- Render each section -->
     {#each sections as section, index}
-      <div class="section" data-section-index={index}>
-        <h3 class="section-header {!section.isCollapsed ? 'sticky' : ''}" on:click={() => toggleCollapse(index)} aria-expanded={!section.isCollapsed}>
-          <span>{section.title}</span>
-          <span class="chevron-icon">
-            {#if section.isCollapsed}
-              <!-- Down chevron -->
-              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 3L5 7L9 3" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            {:else}
-              <!-- Up chevron -->
-              <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 7L5 3L9 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            {/if}
-          </span>
+      <div class="section {section.isCollapsed ? 'collapsed' : ''}" data-section-index={index}>
+        <h3
+          class="section-header"
+          bind:this={sectionHeaderRefs[index]}
+        >
+          <button
+            class="section-header-button"
+            on:click={() => toggleCollapse(index)}
+            aria-expanded={!section.isCollapsed}
+            aria-controls={`section-content-${index}`}
+            type="button"
+          >
+            <span>{section.title}</span>
+            <span class="chevron-icon">
+              {#if section.isCollapsed}
+                <!-- Down chevron -->
+                <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 3L5 7L9 3" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {:else}
+                <!-- Up chevron -->
+                <svg width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 7L5 3L9 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {/if}
+            </span>
+          </button>
         </h3>
         {#if !section.isCollapsed}
-          <div transition:slide={{ duration: 500 }}>
+          <div id={`section-content-${index}`} transition:slide={{ duration: 500 }}>
             {#each section.content as block}
               {#if block.type === 'text'}
                 <p class={block.style || ''}>{block.value}</p>
@@ -589,37 +672,42 @@
       </div>
     {/each}
   </div>
+
+  <!-- Navigation Controls -->
+  <div class="bottom-nav-controls">
+    <!-- Navigation Buttons -->
+    <div class="bottom-nav-buttons">
+      <button class="bottom-nav-button" on:click={previousSection} aria-label="Previous section">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 12L6 8L10 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="bottom-nav-button" on:click={nextSection} aria-label="Next section">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 4L10 8L6 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      {#each sections as section, index}
+        <button 
+          class="progress-dot {index === currentSectionIndex && !sections[index].isCollapsed ? 'active' : ''}"
+          on:click={() => navigateToSection(index)}
+          aria-label="Go to section {index + 1}"
+        ></button>
+      {/each}
+    </div>
+  </div>
 </div>
+
+<!-- Scroll Position Indicator -->
+<!-- <div class="scroll-indicator">
+  Scroll: {scrollPosition}px
+</div> -->
 
 <!-- Open Sidebar Button (Visible when Sidebar is hidden) -->
 {#if !sidebarVisible}
   <button class="open-button" on:click={openSidebar} aria-label="Open sidebar">i</button>
 {/if}
-
-<!-- Bottom Right Navigation Controls -->
-<div class="bottom-nav-controls">
-  <!-- Navigation Buttons -->
-  <div class="bottom-nav-buttons">
-    <button class="bottom-nav-button" on:click={previousSection} aria-label="Previous section">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 12L6 8L10 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <button class="bottom-nav-button" on:click={nextSection} aria-label="Next section">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 4L10 8L6 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
-  
-  <!-- Progress Indicator -->
-  <div class="progress-indicator">
-    {#each sections as section, index}
-      <button 
-        class="progress-dot {index === currentSectionIndex && !sections[index].isCollapsed ? 'active' : ''}"
-        on:click={() => navigateToSection(index)}
-        aria-label="Go to section {index + 1}"
-      ></button>
-    {/each}
-  </div>
-</div>

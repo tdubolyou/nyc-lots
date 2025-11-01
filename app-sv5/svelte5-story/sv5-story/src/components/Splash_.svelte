@@ -41,7 +41,7 @@
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    /* height: 100vh; */
     display: flex;
     /* align-items: center; */
     justify-content: center;
@@ -112,6 +112,7 @@
     position: relative;
     width: 100%;
     max-width: 600px;
+    height: 300px; /* Fixed height to crop the image */
     margin: 0 auto 1.5rem auto;
     border-radius: 4px;
     overflow: hidden;
@@ -120,7 +121,9 @@
   .image-container img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover; /* Crop the image to fit the container */
+    object-position: center 150%; /* Shift the image up to better center the parking lot */
   }
 
   .enter-button {
@@ -185,35 +188,24 @@
       <div class="byline">By: <a href="https://tomweatherburn.com" target="_blank">Tom Weatherburn</a></div>
       
 
-      
-      <p>
-        New York City is in the grip of a deepening housing crisis. With rents at record highs—climbing over 30% in some neighborhoods since 2020 (NY Times, 2024)—and a near-record low vacancy rate of just 1.4% (NY Times, 2024), the city is struggling to keep up with demand. Despite adding between 12,000 and 30,000 units annually over the past decade (NYC Comptroller, 2023), this growth lags behind population needs, especially in transit-accessible areas. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots—remnants of outdated zoning laws and a car-first mindset that no longer fits the reality of 21st-century urban life. What if we reimagined these spaces? What if, instead of housing cars, they housed people? 
-        While the city adds between 12,000 and 30,000 new units annually (NYC Comptroller, 2023), that pace lags  behind the needs of a growing population and prices continue to march upward, pushing residents out.
-      </p>
       <div class="image-container">
         <img src="{base}/splash_img.jpg" alt="Splash Image" />
         <button class="enter-button" on:click={onClose}>ENTER MAP</button>
       </div>
+      <p>
+        New York City is in the grip of a deepening housing crisis. With rents at record highs and a near-record low vacancy rate, the city is struggling to keep up with housing demand. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots.
+      </p>
       
       <p>
-        At the same time, thousands of surface parking lots lie scattered across the city, often within a short walk of an MTA station. As New York continues to embrace transit-oriented development and higher residential densities, car-centric commuting is becoming increasingly difficult—and physically harder to accommodate. These lots represent an enormous opportunity.  Many of these lots could be repurposed as housing—transforming idle space into homes that better reflect the city’s evolving needs.</p>
+        We mapped the city’s surface parking lots, within 800-meters of MTA stations, areas potentially well suited for new housing and estimate the number of potential housing units that could replace these lots. Although not an exahustive site-level evaluation, we find converting even some of these sites could add tens of thousands of homes, potentially filling a portion of the city’s housing gap.</p>
       
-      <p>
       
-        In this analysis, we map and quantify the city's surface parking lots within 800 meters of subway stations. Using land use data from PLUTO and other datasets from the NYC Open Data portal, we estimate the number of housing units that could be built on these sites, applying historical development densities by borough.
-      </p>
-      <p>
-        Our findings suggest that redeveloping these parking lots could yield tens of thousands of new homes. This won’t solve the crisis on its own—no single intervention can—but every additional unit helps. And building near transit has compounding benefits: lower carbon emissions, shorter commutes, and more vibrant, walkable neighborhoods.
-      </p>
-      <p>
-        The practical question now is how quickly New York can adapt its land use priorities. In a city facing a severe housing shortage and limited developable land, maintaining low-density parking lots in high-demand, transit-rich areas presents a missed opportunity. Other cities have already begun to repurpose these spaces for higher-value uses. If New York is to keep pace, it must evaluate where parking remains essential—and where the land could serve more pressing needs.
-      </p>
       
     </div>
-    <div class="down-arrow" class:fadeout={scrolled} on:click={scrollToBottom}>
+    <!-- <div class="down-arrow" class:fadeout={scrolled} on:click={scrollToBottom}>
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF5A30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
-    </div>
+    </div> -->
   </div>
 {/if}

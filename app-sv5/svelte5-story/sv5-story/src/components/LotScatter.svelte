@@ -23,8 +23,8 @@
         properties,
         v => ({
           number_of_lots: v.length,
-          average_lot_size: d3.mean(v, d => d.Area_HA * 10000), // convert hectares to square meters
-          total_area: d3.sum(v, d => d.Area_HA * 10000)
+          average_lot_size: d3.mean(v, d => d.Area_HA), // keep in hectares
+          total_area: d3.sum(v, d => d.Area_HA)
         }),
         d => d.boro_name
       ).map(([key, values]) => ({ boro: key, ...values }));
@@ -115,7 +115,7 @@
         .style('font-family', 'Barlow, sans-serif')
         .style('font-size', '14px')
         .style('font-weight', '700')
-        .text('Average Lot Size (sq m)');
+        .text('Average Lot Size (hectares)');
   
       // Add bubbles
       svgElement.selectAll('circle')
@@ -124,9 +124,9 @@
         .attr('cx', d => x(d.number_of_lots))
         .attr('cy', d => y(d.average_lot_size))
         .attr('r', d => r(d.total_area))
-        .attr('fill', '#FF3300')
+        .attr('fill', '#008080')
         .attr('opacity', 0.6)
-        .attr('stroke', '#FF3300')
+        .attr('stroke', '#008080')
         .attr('stroke-width', 1)
         .style('cursor', 'pointer');
   
@@ -164,7 +164,7 @@
             // .attr('stroke', '#000000FF');
           
           // Show tooltip
-          tooltipText = `${d.boro}\nNumber of lots: ${d3.format(',')(d.number_of_lots)}\nAvg lot size: ${d3.format(',.0f')(d.average_lot_size)} sqm\nTotal area: ${d3.format(',.0f')(d.total_area)} sqm`;
+          tooltipText = `${d.boro}\nNumber of lots: ${d3.format(',')(d.number_of_lots)}\nAvg lot size: ${d3.format(',.2f')(d.average_lot_size)} ha\nTotal area: ${d3.format(',.2f')(d.total_area)} ha`;
           tooltipVisible = true;
           tooltipX = event.pageX + 15;
           tooltipY = event.pageY - 50;

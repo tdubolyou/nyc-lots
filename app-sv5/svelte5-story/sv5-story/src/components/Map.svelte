@@ -21,6 +21,7 @@
   const dispatch = createEventDispatcher();
   let mapShown = false; // flag to show map only once
   let initialAnimationComplete = false; // Track if initial animation has played
+  export let splashClosed = false; // Prop to know when splash is closed
   
   // Initialize coordinate display variables
   let cursorLng = '-74.00';
@@ -28,9 +29,9 @@
   let cursorZoom = '9.8';
 
   // Reactive legend variables
-  let legendTitle = "Parking Lot Area (m²)";
+  let legendTitle = "Parking Lot Area (hectares)";
   let legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
-  let legendLabels = ["0", "250", "500", "750", "1000+"];
+  let legendLabels = ["0", "0.4", "0.8", "1.2", "1.6+"];
 
   // Function to update legend from parent component
   function updateLegend(legendData) {
@@ -67,9 +68,13 @@
     initialAnimationComplete = true;
 
     // Open the first sidebar section after the animation
-    setTimeout(() => {
-      openSection.set(0);
-    }, 5000); // Match the duration of the flyTo
+    // Removed - this functionality should be handled by the Sidebar component
+  }
+
+  // Reactive statement to trigger animation when splash is closed
+  $: if (splashClosed && map && !initialAnimationComplete) {
+    // Small delay to ensure smooth transition from splash to map
+    setTimeout(playInitialAnimation, 500);
   }
 
   // Updated flyTo function to handle legend data, now with "gradient-units" for lots_units color scheme
@@ -278,6 +283,20 @@
           }
         });
         
+        // White hairline outline always visible
+        map.addLayer({
+          'id': 'lots_par_white_outline',
+          'type': 'line',
+          'source': 'lots_par',
+          'minzoom': 0,
+          'layout': { 'visibility': 'visible' },
+          'paint': {
+            'line-color': '#FFFFFF',
+            'line-width': 0.5
+          }
+        });
+        
+        // Orange outline that appears at high zoom
         map.addLayer({
           'id': 'lots_par_outline',
           'type': 'line',
@@ -362,7 +381,7 @@
             <span style="font-size:18px"><strong>${props.Address__pts || 'N/A'}</strong></span><br>
             Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
             Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
-            Area (HA): <strong>${props.Area_HA || 'N/A'}</strong><br>
+            Area (HA): <strong>${props.Area_HA ? parseFloat(props.Area_HA).toFixed(3) : 'N/A'}</strong><br>
             <strong>Estimated Unit Potential:</strong>
             <span style="font-family: 'Barlow'; font-weight: 900; color: #FF5A30; font-size:44px; display: block; margin: 15px 0; text-align: center;">${props.EstUnitsBoro ? Math.round(props.EstUnitsBoro) : 'N/A'}</span>
           `;
@@ -418,7 +437,7 @@
               ['linear'],
               ['get', 'Area_HA'],
               0, 0,
-              30, 1
+              1.6, 1
             ],
             'heatmap-intensity': [
               'interpolate',
@@ -767,8 +786,7 @@
           if (!mapShown) {
             document.getElementById('map').style.display = 'block';
             mapShown = true;
-            // Start the animation after a short delay to ensure smooth transition
-            setTimeout(playInitialAnimation, 1000);
+            // Animation will be triggered by splashClosed prop instead
           }
         });
   
@@ -887,9 +905,9 @@
 </style>
   
 <div id="map"></div>
-<div class="coordinates-box">
+<!-- <div class="coordinates-box">
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
-</div>
+</div> -->
 <div class="legend">
   <div>{legendTitle}</div>
   <div class="legend-gradient" style="background: {legendGradientStyle}"></div>

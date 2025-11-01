@@ -75,7 +75,7 @@
         .attr('y', d => y(d.count))
         .attr('width', x.bandwidth())
         .attr('height', d => height - y(d.count))
-        .attr('fill', '#FF3300')
+        .attr('fill', '#008080')
         .attr('opacity', 0.8);
 
     // Bar labels
@@ -95,11 +95,13 @@
     // Title
     svg.append('text')
       .attr('x', width / 2)
-      .attr('y', height + margin.bottom - 5)
+      .attr('y', height + margin.bottom - 2)
       .attr('text-anchor', 'middle')
       .style('font-family', 'Barlow, sans-serif')
-      .style('font-size', '10px')
+      .style('font-size', '14px')
       .style('font-weight', '700')
+      .style('fill', '#b0b0b0')
+
       .text('Number of Parking Lots by Borough');
 
     // Y axis label
@@ -122,7 +124,7 @@
     background: #ffffff;
     padding: 1rem;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
     width: 100%;
     max-width: 100%;
   }

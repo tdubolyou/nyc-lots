@@ -123,7 +123,7 @@
 
 	<!-- Map is always rendered but initially hidden -->
 	<div class="map-container {showSplash ? '' : 'visible'}">
-		<Map on:mapReady={handleMapRef} />
+		<Map on:mapReady={handleMapRef} splashClosed={!showSplash} />
 	</div>
 
 	<!-- Main Content (Visible when Splash is hidden) -->

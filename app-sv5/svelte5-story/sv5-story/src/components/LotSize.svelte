@@ -36,7 +36,7 @@
     data.sort((a, b) => b.median - a.median);
 
     // Set up margins
-    const margin = { top: 10, right: 30, bottom: 40, left: 0 };
+    const margin = { top: 10, right: 30, bottom: 40, left: 60 };
 
     // Get the container's width and calculate dimensions
     const containerWidth = chart.clientWidth;
@@ -90,6 +90,13 @@
       .domain([0, d3.max(data, d => d3.max(d.points))])
       .range([height, 0]);
 
+    // Add Y axis
+    svg.append('g')
+      .call(d3.axisLeft(y).tickFormat(d => `${d.toFixed(1)} ha`))
+      .selectAll('text')
+        .style('font-family', 'Barlow, sans-serif')
+        .style('font-size', '12px');
+
     // Draw boxplots
     const boxWidth = x.bandwidth();
 
@@ -106,9 +113,9 @@
       .attr('width', boxWidth)
       .attr('y', d => y(d.q3))
       .attr('height', d => y(d.q1) - y(d.q3))
-      .attr('fill', '#FF3300')
+      .attr('fill', '#008080')
       .attr('opacity', 0.7)
-      .attr('stroke', '#FF3300')
+      .attr('stroke', '#008080')
       .attr('stroke-width', 1);
 
     // Median line
@@ -149,7 +156,7 @@
           .attr('cx', () => boxWidth/2 + (Math.random() - 0.5) * jitterWidth)
           .attr('cy', value => y(value))
           .attr('r', 2)
-          .attr('fill', '#FF3300')
+          .attr('fill', '#008080')
           .attr('opacity', 0.3)
           .on('mouseover', function(event, value) {
             // Highlight point
@@ -194,7 +201,7 @@
     background: #ffffff;
     padding: 1rem;
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
     width: 100%;
     max-width: 100%;
     position: relative;
