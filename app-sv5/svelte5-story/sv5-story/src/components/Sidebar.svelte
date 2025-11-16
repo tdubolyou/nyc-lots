@@ -178,26 +178,30 @@
 
   // Update toggleCollapse to maintain currentSectionIndex
   function toggleCollapse(index) {
-    // Close all sections and open the clicked one
+    const wasOpen = !sections[index].isCollapsed;
+    
+    // Toggle the clicked section, close all others
     sections = sections.map((section, i) => ({
       ...section,
-      isCollapsed: i !== index
+      isCollapsed: i === index ? wasOpen : true
     }));
 
-    // Always update currentSectionIndex when a section is clicked
-    currentSectionIndex = index;
+    // Update currentSectionIndex when a section is opened
+    if (!wasOpen) {
+      currentSectionIndex = index;
+      
+      // Only trigger flyTo and scroll when opening a section
+      const targetSection = sections[index];
+      flyTo(
+        targetSection.coordinates,
+        targetSection.zoomLevel,
+        targetSection.layerOn || [],
+        targetSection.layerOff || [],
+        targetSection.legend
+      );
 
-    // Always trigger flyTo and scroll when a section is clicked
-    const targetSection = sections[index];
-    flyTo(
-      targetSection.coordinates,
-      targetSection.zoomLevel,
-      targetSection.layerOn || [],
-      targetSection.layerOff || [],
-      targetSection.legend
-    );
-
-    scrollToSection(index);
+      scrollToSection(index);
+    }
   }
 
   // Simple scroll function - put the section header at the top of the viewport (below main header)
@@ -266,10 +270,10 @@
   
   .section-header {
     color: #000;
-    font-weight: 900;
+    font-weight: 300;
     margin: 0.5rem 0;
     transition: background-color 0.2s ease;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     background: #ffffff;
   }
 
@@ -286,6 +290,7 @@
     color: inherit;
     cursor: pointer;
     text-align: left;
+    font-weight: 300;
   }
 
   .section-header-button:hover {
@@ -314,14 +319,14 @@
   }
 
   .section.collapsed .section-header-button {
-    font-weight: 600;
+    font-weight: 300;
     color: #666;
     opacity: 0.9;
   }
 
   .section.collapsed .section-header-button:hover {
     color: #333;
-    font-weight: 700;
+    font-weight: 300;
   }
   
   header h1, header h2, header p {
