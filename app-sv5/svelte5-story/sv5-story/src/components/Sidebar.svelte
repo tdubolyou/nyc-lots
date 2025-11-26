@@ -27,15 +27,17 @@
   // Each section now has a content array of blocks.
   let sections = [
     { 
-      title: "How many surface lots are there in NYC?", 
+      title: "How Many Transit-Oriented Surface Parking Lots are in NYC?", 
       content: [
         { type: "text", value: "2,222", style: "highlight-number" },
         { type: "text", value: "Parking Lots", style: "highlight-subtitle" },
         
-        { type: "text", value: "There are 2,222 parcels surface parking lots within 800 metres of an MTA station across the city.  Brooklyn has the highest number of lots with 786. Staten Island has the least at 108."},  
+        { type: "text", value: "2,222 surface parking parcels sit within walking distance of MTA stations.  Some lots are made up of many parcels so the real number is somewhat lower."},
         
  
         { type: "chart", component: "BoroChart" },
+        { type: "text", value: "Brooklyn contains the largest share with 786. Staten Island has the fewest, 108, though many of its sites are significantly larger.  Manhattan contains 301 lots, about a third of which are below Central Park."},  
+        
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
@@ -49,14 +51,14 @@
       }
     },
     { 
-      title: "How big are they?", 
+      title: "Whats the Total Footprint of These Parking Lots?", 
       content: [
         { type: "chart", component: "LotScatterChart" },      
-      { type: "text", value: "The total land area is just over 150 Hectares.  This is equivalent to about half of central park or more than 13 Hudson Yards.  The size of parking lots varies significantly across Burroughs.   While Brooklyn has the smallest average lot size, with nearly 800, it has the highest overall lot area.  Staten Island has far fewer lots but very large sites." }
+      { type: "text", value: "Together, the city’s surface lots occupy just over 150 hectares - roughly half of Central Park, or more than thirteen Hudson Yards.  The pattern varies by borough: Brooklyn has the most land overall at 50 hectares, but the smallest average size; Staten Island, with lower total area at just over 10 hectares, holds disproportionately large sites, a mix of park-n-ride lots and large commercial parking." }
           
       ],
-      coordinates: [-73.9795, 40.6688],
-      zoomLevel: 12.6,
+      coordinates: [-73.9932, 40.6748],
+      zoomLevel: 15,
       isCollapsed: true,
       layerOn: ['heatmap', 'lots_par_fill', 'lots_par_outline', 'lots_par'],
       layerOff: ['lots_units_faded','dev_pts_heatmap', 'dev_par_fill', 'dev_par_outline', 'boro-labels', 'boro-unit-labels'],
@@ -68,9 +70,9 @@
     },
     
     { 
-      title: "Lots of small parcels close together", 
+      title: "Parcel Fragmentation and Redevelopment Constraints", 
       content: [
-        { type: "text", value: "Im not sure what to say here yet, I just wanted to zoom in on something. There are many areas in the city where small lots are clustered together, and areas were large lots are industrial. Click parcels for details." },
+        { type: "text", value: "There some obvious reasons many of these sites have not been redeveloped already.  Many surface lots consist of multiple small, separately owned parcels, each with different configurations, reflecting historical structures and incremental change. This fragmentation makes redevelopment potential more complicated and often expensive, potentially keeping parking as the most stable, low-risk use." },
              
       ],
       coordinates: [-73.9934, 40.7271],
@@ -88,9 +90,9 @@
     
     
     { 
-      title: "What typically gets built in each borough?", 
+      title: "What Typically Gets Built in Each Borough?", 
       content: [
-        { type: "text", value: "Historical development data shows how dense development projects tend to be in each ward, over the last 10 years.  Not surprisingly, Manhattan has the highest densitieswhile the other burroughs vary quite a bit.  Looking at trends lines shows all Burroughs are trending up.  From this data I calculated average densities estimaet housing potential on parking lots." },
+        { type: "text", value: "A decade of project data illustrates how each borough typically builds. Manhattan sees the highest densities, driven by land values and zoning. The outer boroughs vary widely but show an upward trajectory over time. These historic densities form the basis for estimating potential development outcomes on surface parking lots.  Looking at trends lines shows all Burroughs are trending up.  From this data I calculated average densities estimaet housing potential on parking lots." },
         { type: "chart", component: "DevLine" }  
       ],
       coordinates: [-73.9938, 40.7512],
@@ -107,9 +109,10 @@
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "Applying historic density to the area of the parking lots, gives a sense of the housing potential of these surface lots. Doing so yielded a total of: 62,820 units." },
+        { type: "text", value: "Suspending, for a minute, the potential financial and regulatory barriers to redevelopment, and applying recent development densities to land now used for surface parking yields an estimated 62,820 housing units." },
         { type: "text", value: "62,820", style: "highlight-number" },
-        { type: "text", value: "Given new untis have ranged from 12K to 30k in recent years, this represents between 2 and 5 years of new supply. If one were to apply the average density of the last 3 years, we would see significantly increased yields, up to ~100k units." }
+        { type: "text", value: "Given that New York has added 12,000–30,000 units per year in the last decade, these lots represent two to five years of new supply under today’s conditions. If we apply the higher densities of the last three years — reflecting a shift toward larger, more ambitious projects — capacity rises toward 100,000 units. " },
+        { type: "text", value: "This is by no means a feasibility analysis.  Its simply to highlight that with regulatory change and finaincial incentives, there is potential for significant housing on under-utilized, transit-oriented parking lots across NYC." }
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
@@ -621,7 +624,7 @@
   <div class="sidebar-content" bind:this={sidebarContentRef} on:scroll={handleScroll}>
     <!-- Header Section -->
     <header bind:this={mainHeaderRef}>
-      <h1>How Much Housning Could be Built on the Parking Lots of NYC?</h1>
+      <h1>How Much Housing Could Fit on the Parking Lots of NYC?</h1>
       <h2>A lot, actually</h2>
       <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
       <!-- <p class="introduction">
@@ -665,7 +668,7 @@
           <div id={`section-content-${index}`} transition:slide={{ duration: 500 }}>
             {#each section.content as block}
               {#if block.type === 'text'}
-                <p class={block.style || ''}>{block.value}</p>
+                <p class={block.style || ''}>{@html block.value}</p>
               {:else if block.type === 'chart'}
                 <div class="chart-container">
                   <svelte:component this={componentMap[block.component]} />

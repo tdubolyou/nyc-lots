@@ -154,7 +154,54 @@
         .style('font-size', '16px')
         .style('font-weight', '700')
         .text('Parking Lot Distribution by Borough');
-  
+
+      // Find Brooklyn's position
+      const brooklyn = boroughs.find(d => d.boro === 'Brooklyn');
+      const brooklynX = brooklyn ? x(brooklyn.number_of_lots) : 0;
+      const brooklynY = brooklyn ? y(brooklyn.average_lot_size) : 0;
+      const brooklynRadius = brooklyn ? r(brooklyn.total_area) : 0;
+      
+      // Position label down and to the left of Brooklyn circle
+      const legendX = brooklynX - brooklynRadius - 40;
+      const legendY = brooklynY + brooklynRadius + 20;
+      
+      // Draw straight line connecting text to Brooklyn circle
+      const lineStartX = legendX;
+      const lineStartY = legendY;
+      const lineEndX = brooklynX - brooklynRadius; // Connect to left edge of circle
+      const lineEndY = brooklynY + brooklynRadius; // Connect to bottom-left of circle
+      
+      svgElement.append('line')
+        .attr('x1', lineStartX)
+        .attr('y1', lineStartY)
+        .attr('x2', lineEndX)
+        .attr('y2', lineEndY)
+        .attr('stroke', '#999')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '3,3')
+        .attr('opacity', 0.6);
+      
+      // Legend note with line break
+      const titleText = svgElement.append('text')
+        .attr('x', legendX)
+        .attr('y', legendY)
+        .attr('text-anchor', 'end')
+        .attr('dominant-baseline', 'middle')
+        .style('font-family', 'Barlow, sans-serif')
+        .style('font-size', '11px')
+        .style('font-weight', 'normal')
+        .style('fill', '#666');
+      
+      titleText.append('tspan')
+        .attr('x', legendX)
+        .attr('text-anchor', 'end')
+        .text('Circle size represents');
+      titleText.append('tspan')
+        .attr('x', legendX)
+        .attr('dy', '1.2em')
+        .attr('text-anchor', 'end')
+        .text('total lot area');
+
       svgElement.selectAll('circle')
         .on('mouseover', function(event, d) {
           // Visual hover effects
@@ -178,7 +225,7 @@
           d3.select(this)
             .attr('opacity', 0.6)
             .attr('stroke-width', 1)
-            .attr('stroke', '#FF3300');
+            .attr('stroke', '#008080');
           
           // Hide tooltip
           tooltipVisible = false;

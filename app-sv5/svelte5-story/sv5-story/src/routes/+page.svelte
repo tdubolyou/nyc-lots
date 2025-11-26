@@ -41,6 +41,12 @@
 			if (legendData && mapRef.updateLegend) {
 				mapRef.updateLegend(legendData);
 			}
+			
+			// Fade in mask and stations800m layers when section 0 is opened
+			// Section 0 coordinates: [-74.1009, 40.7000]
+			if (coordinates[0] === -74.1009 && coordinates[1] === 40.7000 && mapRef.fadeInFirstSectionLayers) {
+				mapRef.fadeInFirstSectionLayers();
+			}
 		} else {
 			console.error('Map reference is not set properly or does not have the flyTo method');
 		}

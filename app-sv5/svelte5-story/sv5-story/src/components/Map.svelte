@@ -32,6 +32,9 @@
   let legendTitle = "Parking Lot Area (hectares)";
   let legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
   let legendLabels = ["0", "0.4", "0.8", "1.2", "1.6+"];
+  
+  // Track if first section has been opened to show map legend
+  let showMapLegend = false;
 
   // Function to update legend from parent component
   function updateLegend(legendData) {
@@ -175,9 +178,12 @@
           'id': 'mask',
           'type': 'fill',
           'source': 'mask',
+          'layout': {
+            'visibility': 'none'
+          },
           'paint': {
             'fill-color': '#FFFFFFFF',
-            'fill-opacity': 0.9
+            'fill-opacity': 0
           }
         });
 
@@ -186,9 +192,12 @@
           'id': 'boro',
           'type': 'fill',
           'source': 'boro',
+          'layout': {
+            'visibility': 'none'
+          },
           'paint': {
             'fill-color': '#F0F0F0FF', // Very light grey color
-            'fill-opacity': 1, // Ensure the fill is visible
+            'fill-opacity': 0,
             'fill-outline-color': '#FFFFFF' // Add white outline
           }
         });
@@ -242,8 +251,12 @@
           'id': 'stations800m',
           'type': 'line',
           'source': 'stations800m',
+          'layout': {
+            'visibility': 'none'
+          },
           'paint': {
             'line-color': '#000000',
+            'line-opacity': 0,
             'line-width': [
               'interpolate',
               ['exponential', 1.75],
@@ -309,19 +322,6 @@
           }
         });
 
-        // Invisible popup layer for lots_par - covers entire parcel area
-        map.addSource('lots_par_popup', { type: 'geojson', data: lots_par_popup });
-        map.addLayer({
-          'id': 'lots_par_popup',
-          'type': 'fill',
-          'source': 'lots_par_popup',
-          'layout': { 'visibility': 'visible' },
-          'paint': {
-            'fill-color': 'rgba(0,0,0,0)',
-            'fill-opacity': 0
-          }
-        });
-
         // lots_pts layer (Points feeding the heatmap)
         map.addSource('lots_pts', { type: 'geojson', data: lots_pts });
         // map.addLayer({
@@ -357,59 +357,8 @@
           map.getCanvas().style.cursor = '';
         });
         
-        // Add a click handler with a larger pixel buffer for easier clicking
-        let currentPopup = null; // Store reference to current popup
-        
-        map.on('click', (e) => {
-          // Close any existing popup first
-          if (currentPopup) {
-            currentPopup.remove();
-            currentPopup = null;
-          }
-          
-          // Use a larger pixel radius (30px) to query features around the click point
-          const features = map.queryRenderedFeatures([
-            // e.point,
-          [e.point.x - 20, e.point.y - 20],
-          [e.point.x + 20, e.point.y + 20]
-          ], { layers: ['lots_par_popup'] });
-          
-          if (!features.length) return;
-          const feature = features[0];
-          const props = feature.properties;
-          const content = `
-            <span style="font-size:18px"><strong>${props.Address__pts || 'N/A'}</strong></span><br>
-            Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
-            Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
-            Area (HA): <strong>${props.Area_HA ? parseFloat(props.Area_HA).toFixed(3) : 'N/A'}</strong><br>
-            <strong>Estimated Unit Potential:</strong>
-            <span style="font-family: 'Barlow'; font-weight: 900; color: #FF5A30; font-size:44px; display: block; margin: 15px 0; text-align: center;">${props.EstUnitsBoro ? Math.round(props.EstUnitsBoro) : 'N/A'}</span>
-          `;
-          currentPopup = new maplibre.Popup({
-            closeButton: true,
-            closeOnClick: true,
-            className: 'custom-popup'
-          })
-            .setLngLat(e.lngLat)
-            .setHTML(content)
-            .addTo(map);
-        });
-        
-        // Close popup on zoom/scroll
-        map.on('zoom', () => {
-          if (currentPopup) {
-            currentPopup.remove();
-            currentPopup = null;
-          }
-        });
-        
-        // Close popup on drag/pan
-        map.on('dragstart', () => {
-          if (currentPopup) {
-            currentPopup.remove();
-            currentPopup = null;
-          }
-        });
+        // Store reference to current popup (will be used after popup layer is added)
+        let currentPopup = null;
   
         // Append custom CSS for the popup close button
         const style = document.createElement('style');
@@ -792,8 +741,128 @@
   
 
   
+        // Add popup layer LAST so it's on top and can receive clicks
+        // Use tiny opacity so it's queryable but invisible
+        map.addSource('lots_par_popup', { type: 'geojson', data: lots_par_popup });
+        map.addLayer({
+          'id': 'lots_par_popup',
+          'type': 'fill',
+          'source': 'lots_par_popup',
+          'layout': { 'visibility': 'visible' },
+          'paint': {
+            'fill-color': 'rgba(0,0,0,0)',
+            'fill-opacity': 0.001  // Tiny opacity so layer is queryable
+          }
+        });
+        
+        // Add global click handler - query popup layer directly
+        map.on('click', (e) => {
+          // Query popup layer with bounding box
+          const queryBox = [
+            [e.point.x - 10, e.point.y - 10],
+            [e.point.x + 10, e.point.y + 10]
+          ];
+          let features = map.queryRenderedFeatures(queryBox, { layers: ['lots_par_popup'] });
+          
+          // Fallback to fill layer if popup layer not found
+          if (features.length === 0) {
+            features = map.queryRenderedFeatures(queryBox, { layers: ['lots_par_fill'] });
+          }
+          
+          if (features.length === 0) return;
+          
+          // Close any existing popup first
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
+          
+          // Get the feature
+          const feature = features[0];
+          const props = feature.properties;
+          
+          const content = `
+            <span style="font-size:18px"><strong>${props.Address__pts || 'N/A'}</strong></span><br>
+            Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
+            Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
+            Area (HA): <strong>${props.Area_HA ? parseFloat(props.Area_HA).toFixed(3) : 'N/A'}</strong><br>
+            <strong>Estimated Unit Potential:</strong>
+            <span style="font-family: 'Barlow'; font-weight: 900; color: #FF5A30; font-size:44px; display: block; margin: 15px 0; text-align: center;">${props.EstUnitsBoro ? Math.round(props.EstUnitsBoro) : 'N/A'}</span>
+          `;
+          currentPopup = new maplibre.Popup({
+            closeButton: true,
+            closeOnClick: true,
+            className: 'custom-popup'
+          })
+            .setLngLat(e.lngLat)
+            .setHTML(content)
+            .addTo(map);
+        });
+        
+        // Close popup on zoom/scroll
+        map.on('zoom', () => {
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
+        });
+        
+        // Close popup on drag/pan
+        map.on('dragstart', () => {
+          if (currentPopup) {
+            currentPopup.remove();
+            currentPopup = null;
+          }
+        });
+        
         // Add updateLegend function to the map object
         map.updateLegend = updateLegend;
+        
+        // Add fade-in function for mask, stations800m, and boro layers
+        map.fadeInFirstSectionLayers = function() {
+          if (!map.getLayer('mask') || !map.getLayer('stations800m') || !map.getLayer('boro')) return;
+          
+          // Show the map legend
+          showMapLegend = true;
+          
+          // Set visibility to visible
+          map.setLayoutProperty('mask', 'visibility', 'visible');
+          map.setLayoutProperty('stations800m', 'visibility', 'visible');
+          map.setLayoutProperty('boro', 'visibility', 'visible');
+          
+          // Animate opacity fade-in
+          const duration = 2500; // 2.5 seconds
+          const startTime = performance.now();
+          const startOpacityMask = 0;
+          const targetOpacityMask = 0.9;
+          const startOpacityStations = 0;
+          const targetOpacityStations = 1;
+          const startOpacityBoro = 0;
+          const targetOpacityBoro = 1;
+          
+          function animate(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function for smooth fade
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+            
+            const currentOpacityMask = startOpacityMask + (targetOpacityMask - startOpacityMask) * easeProgress;
+            const currentOpacityStations = startOpacityStations + (targetOpacityStations - startOpacityStations) * easeProgress;
+            const currentOpacityBoro = startOpacityBoro + (targetOpacityBoro - startOpacityBoro) * easeProgress;
+            
+            map.setPaintProperty('mask', 'fill-opacity', currentOpacityMask);
+            map.setPaintProperty('stations800m', 'line-opacity', currentOpacityStations);
+            map.setPaintProperty('boro', 'fill-opacity', currentOpacityBoro);
+            
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          }
+          
+          requestAnimationFrame(animate);
+        };
+        
         dispatch('mapReady', map);
       } catch (error) {
         console.error('Error adding GeoJSON source to the map:', error);
@@ -815,7 +884,7 @@
   
   .coordinates-box {
     position: fixed;
-    top: calc(20px + 80px + 8px); /* 20px (legend top) + 80px (legend height estimate) + 8px (margin) */
+    bottom: 20px;
     right: 20px;
     padding: 10px;
     background: rgba(255, 255, 255, 0.9);
@@ -858,10 +927,68 @@
     font-size: 10px;
   }
 
+  .map-legend {
+    position: fixed;
+    top: calc(20px + 80px + 8px); /* Position below the main legend */
+    right: 20px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    min-width: 150px;
+  }
+
+  .map-legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .map-legend-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .map-legend-symbol {
+    width: 30px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+  }
+
+  .map-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #000000;
+  }
+
+  .map-legend-line {
+    width: 24px;
+    height: 2px;
+    border-top: 2px dashed #000000;
+  }
+
+  .map-legend-square {
+    width: 16px;
+    height: 16px;
+    background-color: #F0F0F0;
+    border: 1px solid #CCCCCC;
+  }
+
+  .map-legend-label {
+    font-size: 11px;
+    color: #333;
+  }
+
   /* Mobile Responsive Styles */
   @media (max-width: 768px) {
     .coordinates-box {
-      top: 10px;
+      bottom: 10px;
       right: 10px;
       font-size: 10px;
       padding: 8px;
@@ -883,6 +1010,38 @@
     .legend-labels {
       font-size: 8px;
     }
+
+    .map-legend {
+      top: calc(20px + 60px + 8px);
+      right: 20px;
+      padding: 8px;
+      font-size: 10px;
+      min-width: 120px;
+    }
+
+    .map-legend-label {
+      font-size: 9px;
+    }
+
+    .map-legend-symbol {
+      width: 24px;
+      height: 16px;
+      margin-right: 6px;
+    }
+
+    .map-legend-dot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .map-legend-line {
+      width: 20px;
+    }
+
+    .map-legend-square {
+      width: 12px;
+      height: 12px;
+    }
   }
 
   /* Small Mobile Devices */
@@ -901,13 +1060,45 @@
       height: 12px;
       min-width: 120px;
     }
+
+    .map-legend {
+      top: calc(15px + 50px + 6px);
+      right: 15px;
+      padding: 6px;
+      font-size: 9px;
+      min-width: 100px;
+    }
+
+    .map-legend-label {
+      font-size: 8px;
+    }
+
+    .map-legend-symbol {
+      width: 20px;
+      height: 14px;
+      margin-right: 4px;
+    }
+
+    .map-legend-dot {
+      width: 5px;
+      height: 5px;
+    }
+
+    .map-legend-line {
+      width: 16px;
+    }
+
+    .map-legend-square {
+      width: 10px;
+      height: 10px;
+    }
   }
 </style>
   
 <div id="map"></div>
-<!-- <div class="coordinates-box">
+<div class="coordinates-box">
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
-</div> -->
+</div>
 <div class="legend">
   <div>{legendTitle}</div>
   <div class="legend-gradient" style="background: {legendGradientStyle}"></div>
@@ -917,3 +1108,25 @@
     {/each}
   </div>
 </div>
+{#if showMapLegend}
+<div class="map-legend">
+  <div class="map-legend-item">
+    <div class="map-legend-symbol">
+      <div class="map-legend-dot"></div>
+    </div>
+    <div class="map-legend-label">MTA Stations</div>
+  </div>
+  <div class="map-legend-item">
+    <div class="map-legend-symbol">
+      <div class="map-legend-line"></div>
+    </div>
+    <div class="map-legend-label">800m Buffer</div>
+  </div>
+  <div class="map-legend-item">
+    <div class="map-legend-symbol">
+      <div class="map-legend-square"></div>
+    </div>
+    <div class="map-legend-label">NYC</div>
+  </div>
+</div>
+{/if}
