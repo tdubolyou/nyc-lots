@@ -20,8 +20,8 @@
 			mapRef.flyTo({
 				center: coordinates,
 				zoom: zoomLevel,
-				duration: 1800, // Equivalent to speed: 0.8 (slower, smoother animation)
-				curve: 1,
+				duration: 3500, // Longer duration to prevent motion sickness
+				curve: 1.42, // Smoother curve for gentler animation
 			});
 
 			// Handle layer visibility
