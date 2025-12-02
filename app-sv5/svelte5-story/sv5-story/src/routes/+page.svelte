@@ -20,7 +20,7 @@
 			mapRef.flyTo({
 				center: coordinates,
 				zoom: zoomLevel,
-				speed: 0.8,
+				duration: 1800, // Equivalent to speed: 0.8 (slower, smoother animation)
 				curve: 1,
 			});
 
@@ -104,8 +104,9 @@
 		}
 
 		.map-container {
-			height: 60vh;
+			height: 100vh;
 			width: 100%;
+			position: relative;
 		}
 		
 		.map-container.sidebar-visible {
@@ -117,9 +118,45 @@
 	@media (max-width: 480px) {
 		.map-container {
 			width: 100%;
+			height: 100vh;
+		}
+	}
+
+	/* Landscape orientation */
+	@media (max-width: 768px) and (orientation: landscape) {
+		.map-container {
+			height: 100vh;
+		}
+	}
+
+	/* Skip link styles */
+	.skip-link {
+		position: absolute;
+		top: -40px;
+		left: 0;
+		background: #008080;
+		color: white;
+		padding: 8px 16px;
+		z-index: 10000;
+		text-decoration: none;
+		font-family: 'Barlow', sans-serif;
+	}
+
+	.skip-link:focus {
+		top: 0;
+	}
+
+	/* Reduced motion support */
+	@media (prefers-reduced-motion: reduce) {
+		*, *::before, *::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
 		}
 	}
 </style>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <div class="app">
 	<!-- Splash Page (Visible on Load) -->
@@ -128,9 +165,9 @@
 	{/if}
 
 	<!-- Map is always rendered but initially hidden -->
-	<div class="map-container {showSplash ? '' : 'visible'}">
+	<main id="main-content" class="map-container {showSplash ? '' : 'visible'}">
 		<Map on:mapReady={handleMapRef} splashClosed={!showSplash} />
-	</div>
+	</main>
 
 	<!-- Main Content (Visible when Splash is hidden) -->
 	{#if !showSplash}

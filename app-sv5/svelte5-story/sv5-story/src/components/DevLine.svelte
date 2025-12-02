@@ -237,7 +237,7 @@
   });
 </script>
 
-<div class="chart-container">
+<div class="chart-container" role="img" aria-label="Line chart showing development density trends over time by borough from 2013 to 2023. Manhattan shows highest densities around 400-600 units per hectare, while outer boroughs range from 50-200 units per hectare. All boroughs show upward trends over time.">
   <svg bind:this={svg}></svg>
 </div>
 

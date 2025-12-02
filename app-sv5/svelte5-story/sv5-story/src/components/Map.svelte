@@ -80,35 +80,6 @@
     setTimeout(playInitialAnimation, 500);
   }
 
-  // Updated flyTo function to handle legend data, now with "gradient-units" for lots_units color scheme
-  const flyTo = (coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = [], legendData = null) => {
-    if (map) {
-      // Update legend if provided
-      if (legendData) {
-        legendTitle = legendData.title;
-        if (legendData.gradient === "development-gradient") {
-          legendGradientStyle = "linear-gradient(to right, rgba(245,245,220,0) 0%, rgba(245,245,220,0) 5%, rgb(222,184,135,0.5) 20%, rgb(210,180,140) 40%, rgb(160,82,45) 60%, rgb(139,69,19) 80%, rgb(101,67,33) 95%, rgb(69,46,23) 100%)";
-        } else if (legendData.gradient === "units-gradient") {
-          // This matches the lots_units heatmap color ramp
-          legendGradientStyle = "linear-gradient(to right, rgba(200,255,200,0) 0%, rgba(180,255,120,0.5) 20%, rgba(100,220,100,0.8) 40%, rgba(44,162,95,1) 60%, rgba(0,109,80,1) 80%, rgba(0,70,60,1) 100%)";
-        } else if (legendData.gradient === "units-faded-gradient") {
-          // This matches the lots_units_faded heatmap color ramp
-          legendGradientStyle = "linear-gradient(to right, rgba(240,240,240,0) 0%, rgba(220,220,220,0.3) 20%, rgba(200,200,200,0.5) 40%, rgba(180,180,180,0.7) 60%, rgba(160,160,160,0.8) 80%, rgba(140,140,140,0.9) 100%)";
-        } else {
-          legendGradientStyle = "linear-gradient(to right, rgba(220,250,250,0) 0%, rgba(229,280,270,0.5) 20%, rgb(153,216,215) 40%, rgb(102,194,184) 60%, rgb(44,162,165) 80%, rgb(0,109,130) 100%)";
-        }
-        legendLabels = legendData.labels;
-      }
-      
-      map.flyTo({
-        center: coordinates,
-        zoom: zoomLevel,
-        speed: 0.8,
-        curve: 1
-      });
-    }
-  };
-
   onMount(() => {
     // Hide the map container initially
     const mapEl = document.getElementById('map');
@@ -308,7 +279,7 @@
             'line-width': 0.5
           }
         });
-        
+
         // Orange outline that appears at high zoom
         map.addLayer({
           'id': 'lots_par_outline',
@@ -729,7 +700,7 @@
             'text-halo-width': 3
           }
         });
-
+  
         // Use map idle event to display the map container and start animation
         map.on('idle', () => {
           if (!mapShown) {
@@ -755,7 +726,48 @@
           }
         });
         
-        // Add global click handler - query popup layer directly
+        // Helper function to find nearest point from lots_pts
+        function findNearestPoint(clickLng, clickLat, pointX, pointY, maxDistance = 0.001) {
+          // First, try to query rendered points (if visible) using a small bounding box
+          const pointBox = [
+            [pointX - 5, pointY - 5],
+            [pointX + 5, pointY + 5]
+          ];
+          const pointFeatures = map.queryRenderedFeatures(pointBox, { layers: ['lots_pts'] });
+          
+          if (pointFeatures.length > 0) {
+            return pointFeatures[0].properties;
+          }
+          
+          // If no rendered points, search in the imported lots_pts data
+          if (lots_pts && lots_pts.features) {
+            let nearestPoint = null;
+            let minDistance = Infinity;
+            
+            for (const pointFeature of lots_pts.features) {
+              if (pointFeature.geometry && pointFeature.geometry.coordinates) {
+                const [lng, lat] = pointFeature.geometry.coordinates;
+                // Calculate distance using simple Euclidean distance (degrees)
+                const dLat = lat - clickLat;
+                const dLng = lng - clickLng;
+                const distance = Math.sqrt(dLat * dLat + dLng * dLng);
+                
+                if (distance < minDistance && distance < maxDistance) {
+                  minDistance = distance;
+                  nearestPoint = pointFeature;
+                }
+              }
+            }
+            
+            if (nearestPoint && nearestPoint.properties) {
+              return nearestPoint.properties;
+            }
+          }
+          
+          return null;
+        }
+        
+        // Add global click handler - query popup layer and find nearest point
         map.on('click', (e) => {
           // Query popup layer with bounding box
           const queryBox = [
@@ -764,12 +776,51 @@
           ];
           let features = map.queryRenderedFeatures(queryBox, { layers: ['lots_par_popup'] });
           
-          // Fallback to fill layer if popup layer not found
-          if (features.length === 0) {
+          let props = null;
+          const clickLng = e.lngLat.lng;
+          const clickLat = e.lngLat.lat;
+          
+          // If we got popup layer features, try to find nearest point first
+          if (features.length > 0 && features[0].layer.id === 'lots_par_popup') {
+            // Try to find nearest point from lots_pts
+            const pointProps = findNearestPoint(clickLng, clickLat, e.point.x, e.point.y);
+            if (pointProps) {
+              props = pointProps;
+            } else {
+              // Fallback to parcel properties if no point found
+              props = features[0].properties;
+            }
+          } else {
+            // Fallback to fill layer and match to popup data
             features = map.queryRenderedFeatures(queryBox, { layers: ['lots_par_fill'] });
+            if (features.length > 0) {
+              const clickedFeature = features[0];
+              
+              // Try to find nearest point from lots_pts
+              const pointProps = findNearestPoint(clickLng, clickLat, e.point.x, e.point.y);
+              if (pointProps) {
+                props = pointProps;
+              } else {
+                // Find matching feature in popup data by matching geometry
+                if (lots_par_popup && lots_par_popup.features) {
+                  const clickedGeom = JSON.stringify(clickedFeature.geometry.coordinates);
+                  const popupMatch = lots_par_popup.features.find(f => {
+                    if (!f.geometry || !f.geometry.coordinates) return false;
+                    return JSON.stringify(f.geometry.coordinates) === clickedGeom;
+                  });
+                  if (popupMatch && popupMatch.properties) {
+                    props = popupMatch.properties;
+                  }
+                }
+                // If no match found, use fill layer properties as last resort
+                if (!props) {
+                  props = clickedFeature.properties;
+                }
+              }
+            }
           }
           
-          if (features.length === 0) return;
+          if (!props) return;
           
           // Close any existing popup first
           if (currentPopup) {
@@ -777,16 +828,16 @@
             currentPopup = null;
           }
           
-          // Get the feature
-          const feature = features[0];
-          const props = feature.properties;
+          // Handle both point data (Address) and parcel data (Address__pts)
+          const address = props.Address__pts || props.Address || 'N/A';
+          const owner = props.OwnerName__pts || props.OwnerName || 'N/A';
           
           const content = `
-            <span style="font-size:18px"><strong>${props.Address__pts || 'N/A'}</strong></span><br>
-            Borough: <strong>${props.boro_name || 'N/A'}</strong><br>
-            Owner: <strong>${props.OwnerName__pts  || 'N/A'}</strong><br>
-            Area (HA): <strong>${props.Area_HA ? parseFloat(props.Area_HA).toFixed(3) : 'N/A'}</strong><br>
-            <strong>Estimated Unit Potential:</strong>
+            <span style="font-size:18px"><strong>${address}</strong></span><br>
+            Borough: ${props.boro_name || 'N/A'}<br>
+            Owner: ${owner}<br>
+            Area (HA): ${props.Area_HA ? parseFloat(props.Area_HA).toFixed(3) : 'N/A'}<br>
+            Estimated Unit Potential:
             <span style="font-family: 'Barlow'; font-weight: 900; color: #FF5A30; font-size:44px; display: block; margin: 15px 0; text-align: center;">${props.EstUnitsBoro ? Math.round(props.EstUnitsBoro) : 'N/A'}</span>
           `;
           currentPopup = new maplibre.Popup({
@@ -814,7 +865,7 @@
             currentPopup = null;
           }
         });
-        
+  
         // Add updateLegend function to the map object
         map.updateLegend = updateLegend;
         
@@ -988,23 +1039,24 @@
   /* Mobile Responsive Styles */
   @media (max-width: 768px) {
     .coordinates-box {
-      bottom: 10px;
+      bottom: 50vh;
       right: 10px;
       font-size: 10px;
       padding: 8px;
     }
 
     .legend {
-      top: 20px;
-      right: 20px;
+      top: 10px;
+      right: 10px;
       bottom: auto;
       padding: 8px;
       font-size: 10px;
+      max-width: 140px;
     }
 
     .legend-gradient {
       height: 15px;
-      min-width: 150px;
+      min-width: 120px;
     }
 
     .legend-labels {
@@ -1012,11 +1064,11 @@
     }
 
     .map-legend {
-      top: calc(20px + 60px + 8px);
-      right: 20px;
+      top: calc(10px + 55px + 6px);
+      right: 10px;
       padding: 8px;
       font-size: 10px;
-      min-width: 120px;
+      min-width: 110px;
     }
 
     .map-legend-label {
@@ -1051,51 +1103,49 @@
     }
 
     .legend {
-      top: 15px;
-      right: 15px;
+      top: 8px;
+      right: 8px;
       padding: 6px;
+      max-width: 120px;
     }
 
     .legend-gradient {
-      height: 12px;
-      min-width: 120px;
-    }
-
-    .map-legend {
-      top: calc(15px + 50px + 6px);
-      right: 15px;
-      padding: 6px;
-      font-size: 9px;
+      height: 10px;
       min-width: 100px;
     }
 
-    .map-legend-label {
-      font-size: 8px;
+    .map-legend {
+      display: none; /* Hide secondary legend on very small screens */
     }
+  }
 
-    .map-legend-symbol {
-      width: 20px;
-      height: 14px;
-      margin-right: 4px;
+  /* Mobile popup styles */
+  @media (max-width: 768px) {
+    :global(.maplibregl-popup-content) {
+      max-width: 280px !important;
+      font-size: 13px !important;
+      padding: 10px !important;
     }
-
-    .map-legend-dot {
-      width: 5px;
-      height: 5px;
+    
+    :global(.maplibregl-popup-content span[style*="font-size:44px"]) {
+      font-size: 32px !important;
     }
+  }
 
-    .map-legend-line {
-      width: 16px;
+  @media (max-width: 480px) {
+    :global(.maplibregl-popup-content) {
+      max-width: 240px !important;
+      font-size: 12px !important;
+      padding: 8px !important;
     }
-
-    .map-legend-square {
-      width: 10px;
-      height: 10px;
+    
+    :global(.maplibregl-popup-content span[style*="font-size:44px"]) {
+      font-size: 28px !important;
     }
   }
 </style>
   
-<div id="map"></div>
+<div id="map" role="application" aria-label="Interactive map of New York City showing surface parking lots within 800 meters of MTA transit stations. Use sidebar navigation to explore different sections and click on parking lots for details."></div>
 <div class="coordinates-box">
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
 </div>

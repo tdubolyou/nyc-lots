@@ -233,7 +233,7 @@
     });
   </script>
   
-  <div class="chart-container">
+  <div class="chart-container" role="img" aria-label="Scatter plot showing total parking lot area by borough. Brooklyn has about 50 hectares across 786 lots, Queens has 40 hectares across 527 lots, Manhattan has 30 hectares across 301 lots, Bronx has 25 hectares across 500 lots, and Staten Island has 10 hectares across 108 lots. Circle size represents total lot area.">
     <svg bind:this={svg}></svg>
   </div>
   

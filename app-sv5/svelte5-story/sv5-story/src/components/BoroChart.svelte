@@ -117,7 +117,7 @@
   });
 </script>
 
-<div bind:this={chart} class="chart-container"></div>
+<div bind:this={chart} class="chart-container" role="img" aria-label="Bar chart showing number of parking lots by borough. Brooklyn has the most with 786, followed by Queens with 527, Manhattan with 301, Bronx with 500, and Staten Island with 108."></div>
 
 <style>
   .chart-container {

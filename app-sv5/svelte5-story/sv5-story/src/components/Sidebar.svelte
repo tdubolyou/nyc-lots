@@ -29,14 +29,11 @@
     { 
       title: "How Many Transit-Oriented Surface Parking Lots are in NYC?", 
       content: [
+        { type: "text", value: "There are 2,222 surface parking parcels that sit within walking distance of MTA stations.  Some lots are made up of many parcels so the real number is somewhat lower."},
         { type: "text", value: "2,222", style: "highlight-number" },
         { type: "text", value: "Parking Lots", style: "highlight-subtitle" },
-        
-        { type: "text", value: "2,222 surface parking parcels sit within walking distance of MTA stations.  Some lots are made up of many parcels so the real number is somewhat lower."},
-        
- 
+        { type: "text", value: "Brooklyn contains the largest share with 786. Staten Island has the fewest, 108, though many of its sites are significantly larger.  Manhattan contains 301 lots, about a third of which are below Central Park."}, 
         { type: "chart", component: "BoroChart" },
-        { type: "text", value: "Brooklyn contains the largest share with 786. Staten Island has the fewest, 108, though many of its sites are significantly larger.  Manhattan contains 301 lots, about a third of which are below Central Park."},  
         
       ],
       coordinates: [-74.1009, 40.7000],
@@ -53,9 +50,10 @@
     { 
       title: "Whats the Total Footprint of These Parking Lots?", 
       content: [
-        { type: "chart", component: "LotScatterChart" },      
-      { type: "text", value: "Together, the city’s surface lots occupy just over 150 hectares - roughly half of Central Park, or more than thirteen Hudson Yards.  The pattern varies by borough: Brooklyn has the most land overall at 50 hectares, but the smallest average size; Staten Island, with lower total area at just over 10 hectares, holds disproportionately large sites, a mix of park-n-ride lots and large commercial parking." }
-          
+         
+      { type: "text", value: "Together, the city’s surface lots occupy just over 150 hectares - roughly half of Central Park, or more than thirteen Hudson Yards. " },
+      { type: "chart", component: "LotScatterChart" },  
+      { type: "text", value: "The pattern varies by borough.  The map shows an example of how this variation looks in Brooklyn, which has the most land overall at 50 hectares, but the smallest average size. By contrast, Staten Island, with lower total area at just over 10 hectares, holds disproportionately large sites, a mix of park-n-ride lots and large commercial parking." }
       ],
       coordinates: [-73.9932, 40.6748],
       zoomLevel: 15,
@@ -92,7 +90,7 @@
     { 
       title: "What Typically Gets Built in Each Borough?", 
       content: [
-        { type: "text", value: "A decade of project data illustrates how each borough typically builds. Manhattan sees the highest densities, driven by land values and zoning. The outer boroughs vary widely but show an upward trajectory over time. These historic densities form the basis for estimating potential development outcomes on surface parking lots.  Looking at trends lines shows all Burroughs are trending up.  From this data I calculated average densities estimaet housing potential on parking lots." },
+        { type: "text", value: "A decade of project data illustrates how each borough typically builds. Manhattan sees the highest densities, driven by land values and zoning. The outer boroughs vary widely with Queens and Brooklyn showing an upward trajectory over time. These historic densities form the basis for estimating potential development outcomes on surface parking lots." },
         { type: "chart", component: "DevLine" }  
       ],
       coordinates: [-73.9938, 40.7512],
@@ -112,7 +110,7 @@
         { type: "text", value: "Suspending, for a minute, the potential financial and regulatory barriers to redevelopment, and applying recent development densities to land now used for surface parking yields an estimated 62,820 housing units." },
         { type: "text", value: "62,820", style: "highlight-number" },
         { type: "text", value: "Given that New York has added 12,000–30,000 units per year in the last decade, these lots represent two to five years of new supply under today’s conditions. If we apply the higher densities of the last three years — reflecting a shift toward larger, more ambitious projects — capacity rises toward 100,000 units. " },
-        { type: "text", value: "This is by no means a feasibility analysis.  Its simply to highlight that with regulatory change and finaincial incentives, there is potential for significant housing on under-utilized, transit-oriented parking lots across NYC." }
+        { type: "text", value: "This is by no means a feasibility analysis.  Its simply to highlight that with regulatory change and finaincial incentives, there is physical space for significant housing on under-utilized, transit-oriented parking lots across NYC." }
       ],
       coordinates: [-74.1009, 40.7000],
       zoomLevel: 9.9,
@@ -273,7 +271,7 @@
   
   .section-header {
     color: #000;
-    font-weight: 300;
+    font-weight: 500;
     margin: 0.5rem 0;
     transition: background-color 0.2s ease;
     font-size: 1.2rem;
@@ -293,7 +291,7 @@
     color: inherit;
     cursor: pointer;
     text-align: left;
-    font-weight: 300;
+    font-weight: 500;
   }
 
   .section-header-button:hover {
@@ -322,14 +320,14 @@
   }
 
   .section.collapsed .section-header-button {
-    font-weight: 300;
+    font-weight: 500;
     color: #666;
     opacity: 0.9;
   }
 
   .section.collapsed .section-header-button:hover {
     color: #333;
-    font-weight: 300;
+    font-weight: 500;
   }
   
   header h1, header h2, header p {
@@ -363,6 +361,19 @@
   a:hover {
     text-decoration: underline;
   }
+
+  /* Screen reader only class */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
   
   .collapse-button {
     position: absolute;
@@ -380,6 +391,11 @@
   
   .collapse-button:hover {
     background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .collapse-button:focus-visible {
+    outline: 2px solid #008080;
+    outline-offset: 2px;
   }
   
   .open-button {
@@ -405,6 +421,11 @@
   .open-button:hover {
     transform: scale(1.05);
   }
+
+  .open-button:focus-visible {
+    outline: 2px solid #008080;
+    outline-offset: 2px;
+  }
   
   .chevron-icon {
     display: inline-block;
@@ -421,7 +442,7 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 40vh;
+      height: 45vh;
       border-right: none;
       border-top: 1px solid #e5e5e5;
       transform: translateY(100%);
@@ -441,19 +462,32 @@
       left: 20px;
     }
 
+    .collapse-button {
+      top: 5px;
+      right: 5px;
+      padding: 6px;
+      font-size: 1rem;
+    }
+
     .bottom-nav-controls {
       padding: 0.5rem;
       gap: 6px;
     }
 
     .bottom-nav-button {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
     }
 
     .progress-dot {
-      width: 8px;
-      height: 8px;
+      width: 12px;
+      height: 12px;
+      min-width: 20px;
+      min-height: 20px;
+      padding: 4px;
+      box-sizing: content-box;
     }
 
     header h1 {
@@ -468,12 +502,25 @@
       font-size: 0.9rem;
       padding: 0.75rem;
     }
+
+    .section p {
+      font-size: 14px;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .section p.highlight-number {
+      font-size: 56px;
+    }
+
+    .section p.highlight-subtitle {
+      font-size: 28px;
+    }
   }
   
   /* Small Mobile Devices */
   @media (max-width: 480px) {
     .sidebar {
-      height: 50vh;
+      height: 55vh;
     }
 
     header h1 {
@@ -482,6 +529,18 @@
 
     .section-header {
       font-size: 0.85rem;
+    }
+
+    .section p {
+      font-size: 13px;
+    }
+
+    .section p.highlight-number {
+      font-size: 44px;
+    }
+
+    .section p.highlight-subtitle {
+      font-size: 24px;
     }
   }
   
@@ -534,6 +593,11 @@
     cursor: not-allowed;
   }
 
+  .bottom-nav-button:focus-visible {
+    outline: 2px solid #008080;
+    outline-offset: 2px;
+  }
+
   .progress-indicator {
     display: flex;
     flex-direction: row;
@@ -562,6 +626,20 @@
 
   .progress-dot.active:hover {
     background: #e54020;
+  }
+
+  .progress-dot:focus-visible {
+    outline: 2px solid #008080;
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   .scroll-indicator {
@@ -626,7 +704,7 @@
     <header bind:this={mainHeaderRef}>
       <h1>How Much Housing Could Fit on the Parking Lots of NYC?</h1>
       <h2>A lot, actually</h2>
-      <p>By: <a href="https://www.tomweatherburn.com/" target="_blank">Tom Weatherburn</a></p>
+      <p>By: <a href="https://www.tomweatherburn.com/" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
       <!-- <p class="introduction">
         This analysis explores the potential for housing development on surface parking lots near transit stations across New York City. By examining lot sizes, locations, and development patterns, we can estimate how many new housing units could be created in these underutilized spaces.
       </p> -->

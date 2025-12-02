@@ -194,7 +194,7 @@
   });
 </script>
 
-<div bind:this={chart} class="chart-container"></div>
+<div bind:this={chart} class="chart-container" role="img" aria-label="Box plot showing distribution of parking lot sizes by borough in hectares. Each borough displays median, quartiles, and outliers for lot size distribution."></div>
 
 <style>
   .chart-container {
