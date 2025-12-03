@@ -718,7 +718,7 @@
     <header bind:this={mainHeaderRef}>
       <h1>How Much Housing Could Fit on the Parking Lots of NYC?</h1>
       <!-- <h2>A lot, actually</h2> -->
-      <p>By: <a href="https://www.tomweatherburn.com/" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
+      <p>By: <a href="http://www.tomweatherburn.com/" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
       <!-- <p class="introduction">
         This analysis explores the potential for housing development on surface parking lots near transit stations across New York City. By examining lot sizes, locations, and development patterns, we can estimate how many new housing units could be created in these underutilized spaces.
       </p> -->

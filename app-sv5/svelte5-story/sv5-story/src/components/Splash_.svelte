@@ -284,7 +284,7 @@
     <div class="overlay" bind:this={overlayEl} role="dialog" aria-labelledby="splash-title">
       <h1 id="splash-title" class="title">The Parking Lots of NYC</h1>
       <h2 class="subtitle">How Much Housing Could Fit On Transit-Oriented Surface Parking Lots?</h2>
-      <p class="byline">By: <a href="https://tomweatherburn.com" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
+      <p class="byline">By: <a href="http://tomweatherburn.com" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
       
 
       <div class="image-container">
