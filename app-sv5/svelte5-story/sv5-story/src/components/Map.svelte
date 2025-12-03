@@ -1146,9 +1146,9 @@
 </style>
   
 <div id="map" role="application" aria-label="Interactive map of New York City showing surface parking lots within 800 meters of MTA transit stations. Use sidebar navigation to explore different sections and click on parking lots for details."></div>
-<div class="coordinates-box">
+<!-- <div class="coordinates-box">
   Lng: {cursorLng} | Lat: {cursorLat} | Zoom: {cursorZoom}
-</div>
+</div> -->
 <div class="legend">
   <div>{legendTitle}</div>
   <div class="legend-gradient" style="background: {legendGradientStyle}"></div>

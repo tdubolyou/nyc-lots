@@ -29,7 +29,7 @@
     { 
       title: "How Many Transit-Oriented Surface Parking Lots are in NYC?", 
       content: [
-        { type: "text", value: "There are 2,222 surface parking parcels that sit within walking distance of MTA stations.  Some lots are made up of many parcels so the real number is somewhat lower."},
+        { type: "text", value: "There are 2,222 surface parking parcels that sit within walking distance of MTA stations.  "},
         { type: "text", value: "2,222", style: "highlight-number" },
         { type: "text", value: "Parking Lots", style: "highlight-subtitle" },
         { type: "text", value: "Brooklyn contains the largest share with 786. Staten Island has the fewest, 108, though many of its sites are significantly larger.  Manhattan contains 301 lots, about a third of which are below Central Park."}, 
@@ -107,8 +107,9 @@
     { 
       title: "Whats the housing potential of these lots?", 
       content: [
-        { type: "text", value: "Suspending, for a minute, the potential financial and regulatory barriers to redevelopment, and applying recent development densities to land now used for surface parking yields an estimated 62,820 housing units." },
         { type: "text", value: "62,820", style: "highlight-number" },
+        { type: "text", value: "Potential Housing Units", style: "highlight-subtitle" },
+        { type: "text", value: "Suspending, for a minute, the potential financial and regulatory barriers to redevelopment, and applying recent development densities to land now used for surface parking yields an estimated 62,820 housing units." },
         { type: "text", value: "Given that New York has added 12,000–30,000 units per year in the last decade, these lots represent two to five years of new supply under today’s conditions. If we apply the higher densities of the last three years — reflecting a shift toward larger, more ambitious projects — capacity rises toward 100,000 units. " },
         { type: "text", value: "This is by no means a feasibility analysis.  Its simply to highlight that with regulatory change and finaincial incentives, there is physical space for significant housing on under-utilized, transit-oriented parking lots across NYC." }
       ],
@@ -120,7 +121,7 @@
       legend: {
         title: "Housing Potential (Units)",
         gradient: "units-faded-gradient",
-        labels: ["0", "0.4", "0.8", "1.2", "1.6+"]
+        labels: ["0", "25", "50", "100", "200+"]
       }
     }
   ];
@@ -292,6 +293,10 @@
     cursor: pointer;
     text-align: left;
     font-weight: 500;
+  }
+  
+  .section-header.selected .section-header-button {
+    font-weight: 700;
   }
 
   .section-header-button:hover {
@@ -475,10 +480,10 @@
     }
 
     .bottom-nav-button {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      min-height: 44px;
+      width: 70px;
+      height: 40px;
+      min-width: 70px;
+      min-height: 40px;
     }
 
     .progress-dot {
@@ -509,11 +514,11 @@
     }
 
     .section p.highlight-number {
-      font-size: 56px;
+      font-size: 36px;
     }
 
     .section p.highlight-subtitle {
-      font-size: 28px;
+      font-size: 20px;
     }
   }
   
@@ -536,11 +541,11 @@
     }
 
     .section p.highlight-number {
-      font-size: 44px;
+      font-size: 28px;
     }
 
     .section p.highlight-subtitle {
-      font-size: 24px;
+      font-size: 18px;
     }
   }
   
@@ -570,14 +575,23 @@
   .bottom-nav-button {
     background: #FF4500;
     border: none;
-    border-radius: 50%;
-    width: 40px;
+    border-radius: 8px;
+    width: 150px;
     height: 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     transition: background-color 0.2s ease;
+    color: white;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .bottom-nav-button span {
+    color: white;
   }
 
   .bottom-nav-button:hover {
@@ -674,7 +688,7 @@
   /* Style for highlighted numbers */
   .section p.highlight-number {
     font-family: 'Barlow', sans-serif;
-    font-size: 88px;
+    font-size: 60px;
     font-weight: bold;
     color: #008080; /* Teal color */
     text-align: center;
@@ -685,7 +699,7 @@
   /* Style for highlight subtitles */
   .section p.highlight-subtitle {
     font-family: 'Barlow', sans-serif;
-    font-size: 44px;
+    font-size: 36px;
     font-weight: bold;
     color: #008080; /* Teal color */
     text-align: center;
@@ -703,7 +717,7 @@
     <!-- Header Section -->
     <header bind:this={mainHeaderRef}>
       <h1>How Much Housing Could Fit on the Parking Lots of NYC?</h1>
-      <h2>A lot, actually</h2>
+      <!-- <h2>A lot, actually</h2> -->
       <p>By: <a href="https://www.tomweatherburn.com/" target="_blank" rel="noopener noreferrer">Tom Weatherburn<span class="visually-hidden"> (opens in new tab)</span></a></p>
       <!-- <p class="introduction">
         This analysis explores the potential for housing development on surface parking lots near transit stations across New York City. By examining lot sizes, locations, and development patterns, we can estimate how many new housing units could be created in these underutilized spaces.
@@ -716,7 +730,7 @@
     {#each sections as section, index}
       <div class="section {section.isCollapsed ? 'collapsed' : ''}" data-section-index={index}>
         <h3
-          class="section-header"
+          class="section-header {index === currentSectionIndex && !section.isCollapsed ? 'selected' : ''}"
           bind:this={sectionHeaderRefs[index]}
         >
           <button
@@ -767,8 +781,10 @@
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M10 12L6 8L10 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
+        <span>Back</span>
       </button>
       <button class="bottom-nav-button" on:click={nextSection} aria-label="Next section">
+        <span>Next</span>
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M6 4L10 8L6 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>

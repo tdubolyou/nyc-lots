@@ -77,7 +77,7 @@
     background: white;
     padding: 2rem;
     border-radius: 8px;
-    max-width: 650px;
+    max-width: 750px;
     z-index: 1;
     max-height: 90vh; /* Restrict height to enable scrolling */
     overflow-y: auto; /* Enable scrolling when content overflows */
@@ -288,7 +288,7 @@
       
 
       <div class="image-container">
-        <img src="{base}/splash_img.jpg" alt="Aerial view of a surface parking lot in New York City near transit" />
+        <img src="{base}/splash_img_2.png" alt="Aerial view of a surface parking lot in New York City near transit" />
         {#if !isMobile}
           <button class="enter-button" on:click={onClose}>ENTER MAP</button>
         {/if}
@@ -301,11 +301,11 @@
       {/if}
       
       <p>
-        New York City is in the grip of a deepening housing crisis. With rents at record highs and a near-record low vacancy rate, the city is struggling to keep up with housing demand. Meanwhile, vast swaths of land, often just steps from subway stations, remain locked up in surface parking lots.
+        New York City is in the grip of a deepening housing crisis. Rents remain at record highs and the vacancy rate is near historic lows. Even as the city plans for more homes, substantial areas of land near transit continue to function as surface parking — a low-intensity use in locations well served by higher order tranit.
+
       </p>
-      
       <p>
-        We mapped the city's surface parking lots, within 800-meters of MTA stations, areas potentially well suited for new housing and estimate the number of potential housing units that could replace these lots. Although not an exahustive site-level evaluation, we find converting even some of these sites could add tens of thousands of homes, potentially filling a portion of the city's housing gap.
+        This project maps every surface parking lot within 800 metres of an MTA station and compares their land area to the housing densities New York has actually built over the past decade. While this is not a site-specific feasibility analysis, it provides a clear picture of what could be possible if policies or incentives shifted in ways that made higher-density development more viable. Even selective redevelopment of these sites could meaningfully expand the city’s future housing pipeline.      
       </p>
       
       
