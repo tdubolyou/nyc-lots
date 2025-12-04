@@ -23,6 +23,9 @@
   let initialAnimationComplete = false; // Track if initial animation has played
   export let splashClosed = false; // Prop to know when splash is closed
   
+  // Flag to suppress reactive updates during flyTo animation (prevents Windows glitching)
+  let isAnimating = false;
+  
   // Initialize coordinate display variables
   let cursorLng = '-74.00';
   let cursorLat = '40.700';
@@ -59,13 +62,21 @@
   function playInitialAnimation() {
     if (!map || initialAnimationComplete) return;
     
+    isAnimating = true; // Suppress reactive updates during animation
+    
     map.flyTo({
       center: [-74.1009, 40.7000],
       zoom: 9.9,
       bearing: 0,
       pitch: 0,
-      duration: 5000, // Animation duration in milliseconds (12 seconds)
-      essential: true
+      duration: 5000, // Animation duration in milliseconds
+      essential: true, // Prevents animation from being interrupted
+      easing: (t) => t * (2 - t), // Smooth easeOut curve
+    });
+    
+    // Reset animation flag when complete
+    map.once('moveend', () => {
+      isAnimating = false;
     });
     
     initialAnimationComplete = true;
@@ -101,6 +112,7 @@
 
     // Add mousemove event handler
     map.on('mousemove', (e) => {
+      if (isAnimating) return; // Skip updates during flyTo to prevent Windows glitching
       cursorLng = e.lngLat.lng.toFixed(4);
       cursorLat = e.lngLat.lat.toFixed(4);
       cursorZoom = map.getZoom().toFixed(2);
@@ -108,6 +120,7 @@
 
     // Add zoom event handler
     map.on('zoom', () => {
+      if (isAnimating) return; // Skip updates during flyTo to prevent Windows glitching
       cursorZoom = map.getZoom().toFixed(2);
     });
 
@@ -570,8 +583,9 @@
           }
         });
         
-        // Remove popup on zoom change
+        // Remove popup on zoom change (but not during flyTo animation)
         map.on('zoom', () => {
+          if (isAnimating) return; // Skip during flyTo to prevent Windows glitching
           if (devPopup) {
             devPopup.remove();
             devPopup = null;
@@ -850,8 +864,9 @@
             .addTo(map);
         });
         
-        // Close popup on zoom/scroll
+        // Close popup on zoom/scroll (but not during flyTo animation)
         map.on('zoom', () => {
+          if (isAnimating) return; // Skip during flyTo to prevent Windows glitching
           if (currentPopup) {
             currentPopup.remove();
             currentPopup = null;
@@ -868,6 +883,10 @@
   
         // Add updateLegend function to the map object
         map.updateLegend = updateLegend;
+        
+        // Add animation control methods to prevent Windows flyTo glitching
+        map.setAnimating = (value) => { isAnimating = value; };
+        map.getAnimating = () => isAnimating;
         
         // Add fade-in function for mask, stations800m, and boro layers
         map.fadeInFirstSectionLayers = function() {

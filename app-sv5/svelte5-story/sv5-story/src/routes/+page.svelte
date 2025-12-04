@@ -17,36 +17,55 @@
 	// Define a function to fly to the passed coordinates and zoom level
 	function flyTo(coordinates = [-79.3832, 43.6532], zoomLevel = 14, layerOn = [], layerOff = [], legendData = null) {
 		if (mapRef && typeof mapRef.flyTo === 'function') {
+			
+			// Update legend BEFORE animation (lightweight DOM operation)
+			if (legendData && mapRef.updateLegend) {
+				mapRef.updateLegend(legendData);
+			}
+			
+			// Set animation flag to suppress reactive updates during flyTo (prevents Windows glitching)
+			if (mapRef.setAnimating) {
+				mapRef.setAnimating(true);
+			}
+			
+			// Perform flyTo with explicit parameters to prevent Windows glitching
 			mapRef.flyTo({
 				center: coordinates,
 				zoom: zoomLevel,
 				duration: 3500, // Longer duration to prevent motion sickness
 				curve: 1.42, // Smoother curve for gentler animation
+				essential: true, // Prevents animation from being interrupted
+				easing: (t) => t * (2 - t), // Smooth easeOut curve
 			});
 
-			// Handle layer visibility
-			layerOn.forEach(layerId => {
-				if (mapRef.getLayer(layerId)) {
-					mapRef.setLayoutProperty(layerId, 'visibility', 'visible');
+			// Wait for animation to complete BEFORE changing layers
+			// This prevents WebGL frame drops on Windows that cause "snapping"
+			mapRef.once('moveend', () => {
+				// Reset animation flag
+				if (mapRef.setAnimating) {
+					mapRef.setAnimating(false);
 				}
-			});
+				
+				// Handle layer visibility AFTER animation completes
+				layerOn.forEach(layerId => {
+					if (mapRef.getLayer(layerId)) {
+						mapRef.setLayoutProperty(layerId, 'visibility', 'visible');
+					}
+				});
 
-			layerOff.forEach(layerId => {
-				if (mapRef.getLayer(layerId)) {
-					mapRef.setLayoutProperty(layerId, 'visibility', 'none');
+				layerOff.forEach(layerId => {
+					if (mapRef.getLayer(layerId)) {
+						mapRef.setLayoutProperty(layerId, 'visibility', 'none');
+					}
+				});
+				
+				// Fade in mask and stations800m layers when section 0 is opened
+				// Section 0 coordinates: [-74.1009, 40.7000]
+				if (coordinates[0] === -74.1009 && coordinates[1] === 40.7000 && mapRef.fadeInFirstSectionLayers) {
+					mapRef.fadeInFirstSectionLayers();
 				}
 			});
 			
-			// Update legend if legend data is provided
-			if (legendData && mapRef.updateLegend) {
-				mapRef.updateLegend(legendData);
-			}
-			
-			// Fade in mask and stations800m layers when section 0 is opened
-			// Section 0 coordinates: [-74.1009, 40.7000]
-			if (coordinates[0] === -74.1009 && coordinates[1] === 40.7000 && mapRef.fadeInFirstSectionLayers) {
-				mapRef.fadeInFirstSectionLayers();
-			}
 		} else {
 			console.error('Map reference is not set properly or does not have the flyTo method');
 		}
